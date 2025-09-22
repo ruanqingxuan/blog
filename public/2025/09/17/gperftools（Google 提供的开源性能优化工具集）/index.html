@@ -1,0 +1,1068 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/blog/img/fluid.png">
+  <link rel="icon" href="/blog/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="John Doe">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="gperftools（Google 提供的开源性能优化工具集）一、工具概览什么是 gperftools？ gperftools 是 Google 提供的开源性能优化工具集，主要用于性能分析和内存管理。 包括 tcmalloc（高效的内存分配器）和 cpu profiler（CPU 性能分析器）。  主要功能 tcmalloc：优化的内存分配器，替代标准的 malloc。 cpu profiler：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="gperftools（Google 提供的开源性能优化工具集）">
+<meta property="og:url" content="https://ruanqingxuan.github.io/blog/2025/09/17/gperftools%EF%BC%88Google%20%E6%8F%90%E4%BE%9B%E7%9A%84%E5%BC%80%E6%BA%90%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E5%B7%A5%E5%85%B7%E9%9B%86%EF%BC%89/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="gperftools（Google 提供的开源性能优化工具集）一、工具概览什么是 gperftools？ gperftools 是 Google 提供的开源性能优化工具集，主要用于性能分析和内存管理。 包括 tcmalloc（高效的内存分配器）和 cpu profiler（CPU 性能分析器）。  主要功能 tcmalloc：优化的内存分配器，替代标准的 malloc。 cpu profiler：">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://qnwang.oss-cn-hangzhou.aliyuncs.com/internship/20250429163444540.png">
+<meta property="og:image" content="https://qnwang.oss-cn-hangzhou.aliyuncs.com/internship/20250429164022560.png">
+<meta property="og:image" content="https://qnwang.oss-cn-hangzhou.aliyuncs.com/internship/20250429164316052.png">
+<meta property="og:image" content="https://qnwang.oss-cn-hangzhou.aliyuncs.com/internship/20250518171450479.png">
+<meta property="og:image" content="https://qnwang.oss-cn-hangzhou.aliyuncs.com/internship/20250518171727566.png">
+<meta property="og:image" content="https://qnwang.oss-cn-hangzhou.aliyuncs.com/internship/20250518172159207.png">
+<meta property="og:image" content="https://qnwang.oss-cn-hangzhou.aliyuncs.com/internship/20250518172237981.png">
+<meta property="article:published_time" content="2025-09-17T12:00:00.000Z">
+<meta property="article:modified_time" content="2025-09-17T11:44:29.044Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="学习笔记">
+<meta property="article:tag" content="算法">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://qnwang.oss-cn-hangzhou.aliyuncs.com/internship/20250429163444540.png">
+  
+  
+  
+  <title>gperftools（Google 提供的开源性能优化工具集） - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/blog/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/blog/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/blog/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"ruanqingxuan.github.io","root":"/blog/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/blog/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/blog/js/utils.js" ></script>
+  <script  src="/blog/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/blog/">
+      <strong>阮请玄的blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/blog/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/blog/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/blog/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/blog/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/blog/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/blog/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="gperftools（Google 提供的开源性能优化工具集）"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-09-17 20:00" pubdate>
+          2025年9月17日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          4k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          34 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">gperftools（Google 提供的开源性能优化工具集）</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="gperftools（Google-提供的开源性能优化工具集）"><a href="#gperftools（Google-提供的开源性能优化工具集）" class="headerlink" title="gperftools（Google 提供的开源性能优化工具集）"></a>gperftools（Google 提供的开源性能优化工具集）</h1><h2 id="一、工具概览"><a href="#一、工具概览" class="headerlink" title="一、工具概览"></a>一、工具概览</h2><h3 id="什么是-gperftools？"><a href="#什么是-gperftools？" class="headerlink" title="什么是 gperftools？"></a>什么是 gperftools？</h3><ul>
+<li>gperftools 是 Google 提供的开源性能优化工具集，主要用于性能分析和内存管理。</li>
+<li>包括 <code>tcmalloc</code>（高效的内存分配器）和 <code>cpu profiler</code>（CPU 性能分析器）。</li>
+</ul>
+<h3 id="主要功能"><a href="#主要功能" class="headerlink" title="主要功能"></a>主要功能</h3><ul>
+<li><strong>tcmalloc</strong>：优化的内存分配器，替代标准的 <code>malloc</code>。</li>
+<li><strong>cpu profiler</strong>：通过性能采样记录 <strong>CPU 使用情况</strong>，生成火焰图（flame graph）。</li>
+<li><strong>heap profiler</strong>：分析程序的堆内存使用，检测内存泄漏和过度使用。</li>
+</ul>
+<h2 id="二、安装与配置"><a href="#二、安装与配置" class="headerlink" title="二、安装与配置"></a>二、安装与配置</h2><h3 id="安装方式"><a href="#安装方式" class="headerlink" title="安装方式"></a><strong>安装方式</strong></h3><ul>
+<li><p>使用 <code>apt</code>（Ubuntu）：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">sudo</span> apt-get install google-perftools libgoogle-perftools-dev<br></code></pre></td></tr></table></figure>
+</li>
+<li><p>使用 <code>brew</code>（macOS）：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">brew install gperftools<br></code></pre></td></tr></table></figure>
+</li>
+<li><p>编译源码：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash">git <span class="hljs-built_in">clone</span> https://github.com/gperftools/gperftools.git<br><span class="hljs-built_in">cd</span> gperftools<br>./configure<br>make<br><span class="hljs-built_in">sudo</span> make install<br></code></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="配置环境"><a href="#配置环境" class="headerlink" title="配置环境"></a><strong>配置环境</strong></h3><ul>
+<li><p>环境变量设置：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">export</span> LD_PRELOAD=/usr/local/lib/libtcmalloc.so<br></code></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="三、常用工具与命令"><a href="#三、常用工具与命令" class="headerlink" title="三、常用工具与命令"></a>三、常用工具与命令</h2><h3 id="1-tcmalloc（内存分配器）"><a href="#1-tcmalloc（内存分配器）" class="headerlink" title="1. tcmalloc（内存分配器）"></a>1. tcmalloc（内存分配器）</h3><ul>
+<li>作用：提高内存分配与释放效率，减少内存碎片。</li>
+<li>使用：<ul>
+<li>在应用中通过设置 <code>LD_PRELOAD</code> 来加载 <code>libtcmalloc</code>。</li>
+<li>用 <code>gperftools</code> 编译的程序会自动使用 <code>tcmalloc</code>，无须修改代码。</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-CPU-Profiler（CPU-性能分析）"><a href="#2-CPU-Profiler（CPU-性能分析）" class="headerlink" title="2. CPU Profiler（CPU 性能分析）"></a>2. CPU Profiler（CPU 性能分析）</h3><h4 id="启用"><a href="#启用" class="headerlink" title="启用"></a>启用</h4><ul>
+<li><p>编译时使用 <code>-lprofiler</code> 链接 profiler 库。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># LD_PRELOAD 设置加载libprofiler.so</span><br><span class="hljs-comment"># CPUPROFILE 设置采样文件</span><br><span class="hljs-comment"># CPUPROFILE_FREQUENCY 设置采样频率，默认100</span><br><span class="hljs-comment"># 强行结束不能获得采样文件 CPUPROFILESIGNAL设置采样开关信号，关闭采样只需要killall -12 perftest</span><br>LD_PRELOAD=/usr/local/lib/libprofiler.so CPUPROFILE=data.prof CPUPROFILE_FREQUENCY=555 CPUPROFILESIGNAL=12 ./perftest --benchmark_min_time=10000x <br></code></pre></td></tr></table></figure>
+</li>
+<li><p>在代码中启动&#x2F;停止 profiling：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-comment">// 精确控制代码采样的区域</span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;gperftools/profiler.h&gt;</span></span><br><span class="hljs-built_in">ProfilerStart</span>(<span class="hljs-string">&quot;data.prof&quot;</span>);<br><span class="hljs-comment">// 你的代码</span><br><span class="hljs-built_in">ProfilerStop</span>();<br></code></pre></td></tr></table></figure></li>
+</ul>
+<h4 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h4><ul>
+<li><p>使用 <code>pprof</code> 或<code>google-pprof</code>工具解析生成的 <code>data.prof</code> 文件：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">pprof --text ./your_program data.prof<br></code></pre></td></tr></table></figure>
+
+<p><img src="https://qnwang.oss-cn-hangzhou.aliyuncs.com/internship/20250429163444540.png" srcset="/blog/img/loading.gif" lazyload alt="image-20250429163444432"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 每一列含义分析，以红框为例</span><br><span class="hljs-comment"># 函数中的样本数	函数中样本百分比	当前打印的样本百分比	函数以及其调用函数中的样本数量	函数以及其调用子函数中的样本百分比	函数名</span><br></code></pre></td></tr></table></figure>
+</li>
+<li><p>还可以加入<code>--stackes</code>选项打印调用栈</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">pprof --text --stacks ./your_program data.prof<br></code></pre></td></tr></table></figure>
+
+<p><img src="https://qnwang.oss-cn-hangzhou.aliyuncs.com/internship/20250429164022560.png" srcset="/blog/img/loading.gif" lazyload alt="image-20250429164022498"></p>
+</li>
+<li><p>发现这样不够直观，可以用<code>--svg</code>生成调用图更加直观</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">pprof --svg ./your_program ./data.prof &gt; svgout.svg<br></code></pre></td></tr></table></figure>
+
+<p><img src="https://qnwang.oss-cn-hangzhou.aliyuncs.com/internship/20250429164316052.png" srcset="/blog/img/loading.gif" lazyload alt="image-20250429164315976"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 结果分析</span><br><span class="hljs-comment"># 第一行类名</span><br><span class="hljs-comment"># 第二行函数名</span><br><span class="hljs-comment"># 本函数执行执行的时间（直接执行的时间）</span><br><span class="hljs-comment"># 本函数调用函数执行的时间（调用其他函数的时间）</span><br></code></pre></td></tr></table></figure>
+</li>
+<li><p>可以生成火焰图：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">pprof --flame ./your_program data.prof<br></code></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="3-Heap-Profiler（堆内存分析）"><a href="#3-Heap-Profiler（堆内存分析）" class="headerlink" title="3. Heap Profiler（堆内存分析）"></a>3. Heap Profiler（堆内存分析）</h3><ul>
+<li><p>启用：</p>
+<ul>
+<li><p>编译时使用 <code>-lprofiler</code>。</p>
+</li>
+<li><p>运行时启用 heap profiler：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;gperftools/heap-profiler.h&gt;</span></span><br><span class="hljs-built_in">HeapProfilerStart</span>(<span class="hljs-string">&quot;heap_profile&quot;</span>);<br></code></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li><p>分析：</p>
+<ul>
+<li>查看生成的 <code>heap_profile</code> 文件，定位内存泄漏、内存过度分配等问题。</li>
+</ul>
+</li>
+</ul>
+<h3 id="4-Leak-Detector（内存泄漏检测）"><a href="#4-Leak-Detector（内存泄漏检测）" class="headerlink" title="4. Leak Detector（内存泄漏检测）"></a>4. Leak Detector（内存泄漏检测）</h3><ul>
+<li><p>自动检测：当启用 <code>tcmalloc</code> 时，<code>gperftools</code> 自动跟踪内存分配，报告泄漏。</p>
+</li>
+<li><p>例子：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">export</span> HEAPPROFILE=heap_profile<br>./your_program<br></code></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="5-常用命令总结"><a href="#5-常用命令总结" class="headerlink" title="5. 常用命令总结"></a>5. 常用命令总结</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 第一个是用源码编译的，第二个是用apt下载的</span><br>pprof --<span class="hljs-built_in">help</span><br>google-pprof --<span class="hljs-built_in">help</span><br></code></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th><strong>Options</strong></th>
+<th><strong>功能 (NAME)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>--cum</code></td>
+<td>按累计数据排序</td>
+</tr>
+<tr>
+<td><code>--base=&lt;base&gt;</code></td>
+<td>在显示前从配置文件中减去 <code>&lt;base&gt;</code></td>
+</tr>
+<tr>
+<td><strong>Reporting Granularity</strong></td>
+<td><strong>报告粒度</strong></td>
+</tr>
+<tr>
+<td><code>--addresses</code></td>
+<td>按地址级别报告</td>
+</tr>
+<tr>
+<td><code>--lines</code></td>
+<td>按源代码行级别报告</td>
+</tr>
+<tr>
+<td><code>--functions</code></td>
+<td>按函数级别报告（默认）</td>
+</tr>
+<tr>
+<td><code>--files</code></td>
+<td>按源代码文件级别报告</td>
+</tr>
+<tr>
+<td><strong>Output Type</strong></td>
+<td><strong>输出类型</strong></td>
+</tr>
+<tr>
+<td><code>--text</code></td>
+<td>生成文本报告（默认）</td>
+</tr>
+<tr>
+<td><code>--gv</code></td>
+<td>生成 Postscript 并显示</td>
+</tr>
+<tr>
+<td><code>--list=&lt;regexp&gt;</code></td>
+<td>生成匹配常规表达式的源代码列表</td>
+</tr>
+<tr>
+<td><code>--disasm=&lt;regexp&gt;</code></td>
+<td>生成匹配常规表达式的指令反汇编代码</td>
+</tr>
+<tr>
+<td><code>--dot</code></td>
+<td>生成 DOT 格式的文件并输出到标准输出</td>
+</tr>
+<tr>
+<td><code>--ps</code></td>
+<td>生成 Postscript 格式文件输出到标准输出</td>
+</tr>
+<tr>
+<td><code>--pdf</code></td>
+<td>生成 PDF 格式文件输出到标准输出</td>
+</tr>
+<tr>
+<td><code>--gif</code></td>
+<td>生成 GIF 格式文件输出到标准输出</td>
+</tr>
+<tr>
+<td><strong>Heap-Profile Options</strong></td>
+<td><strong>堆分析选项</strong></td>
+</tr>
+<tr>
+<td><code>--inuse_space</code></td>
+<td>显示当前使用的内存（以MB为单位，默认）</td>
+</tr>
+<tr>
+<td><code>--inuse_objects</code></td>
+<td>显示当前使用的对象数量</td>
+</tr>
+<tr>
+<td><code>--alloc_space</code></td>
+<td>显示已分配的内存（以MB为单位）</td>
+</tr>
+<tr>
+<td><code>--alloc_objects</code></td>
+<td>显示已分配的对象数量</td>
+</tr>
+<tr>
+<td><code>--show_bytes</code></td>
+<td>显示内存使用量（以字节为单位）</td>
+</tr>
+<tr>
+<td><code>--drop_negative</code></td>
+<td>忽略负值差异</td>
+</tr>
+<tr>
+<td><strong>Call-graph Options</strong></td>
+<td><strong>调用图选项</strong></td>
+</tr>
+<tr>
+<td><code>--nodecount=&lt;n&gt;</code></td>
+<td>显示最多 <code>&lt;n&gt;</code> 个节点（默认80）</td>
+</tr>
+<tr>
+<td><code>--nodefraction=&lt;f&gt;</code></td>
+<td>隐藏占总数小于 <code>&lt;f&gt;</code> 的节点（默认0.005）</td>
+</tr>
+<tr>
+<td><code>--edgefraction=&lt;f&gt;</code></td>
+<td>隐藏占总数小于 <code>&lt;f&gt;</code> 的边（默认0.001）</td>
+</tr>
+<tr>
+<td><code>--focus=&lt;regexp&gt;</code></td>
+<td>只聚焦匹配 <code>&lt;regexp&gt;</code> 的节点</td>
+</tr>
+<tr>
+<td><code>--ignore=&lt;regexp&gt;</code></td>
+<td>忽略匹配 <code>&lt;regexp&gt;</code> 的节点</td>
+</tr>
+<tr>
+<td><code>--scale=&lt;n&gt;</code></td>
+<td>设置 GV 渲染的缩放比例（默认0）</td>
+</tr>
+</tbody></table>
+<h2 id="四、工具集成与调优"><a href="#四、工具集成与调优" class="headerlink" title="四、工具集成与调优"></a>四、工具集成与调优</h2><h3 id="集成与调试"><a href="#集成与调试" class="headerlink" title="集成与调试"></a><strong>集成与调试</strong></h3><ul>
+<li>配合 <strong>perf</strong> 或 <strong>Valgrind</strong> 使用，进行内存、CPU 性能多角度分析。</li>
+<li>与 <strong>gdb</strong> 配合，调试性能问题和内存泄漏。</li>
+</ul>
+<h3 id="性能优化"><a href="#性能优化" class="headerlink" title="性能优化"></a><strong>性能优化</strong></h3><ul>
+<li>优化内存使用，减少内存分配开销。</li>
+<li>通过 <code>CPU profiler</code> 定位 CPU 瓶颈函数，优化代码热点。</li>
+<li>使用 <code>Heap Profiler</code> 分析程序内存消耗，减少不必要的内存分配。</li>
+</ul>
+<h2 id="五、工作原理与源码分析"><a href="#五、工作原理与源码分析" class="headerlink" title="五、工作原理与源码分析"></a>五、工作原理与源码分析</h2><h3 id="tcmalloc"><a href="#tcmalloc" class="headerlink" title="tcmalloc"></a>tcmalloc</h3><h4 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h4><p>tcmalloc是google开发的一个专门为高并发场景优化的内存分配器，全称为”thread cache malloc”。按照<a target="_blank" rel="noopener" href="http://goog-perftools.sourceforge.net/doc/tcmalloc.html">官网</a>的介绍，tcmalloc相比于glibc2.3的malloc(底层实现为ptmalloc2)主要有以下优点：</p>
+<ol>
+<li>快速：一台2.8GHz的P4机器上，执行一次malloc及free大约需要300纳秒;而tcmalloc的版本同样的操作大约只需要50纳秒。</li>
+<li>空间占用小：相比ptmalloc2，tcmalloc对小对象占用空间进行了优化。例如：分配N个8字节对象只需要占用8N<em>1.01字节的空间。即，只需要多使用1%的空间。而ptmalloc2中每个对象都需要使用一个4字节的头信息，最后占用的字节可能达到8N</em>8。</li>
+<li>不容易出现内存暴涨</li>
+</ol>
+<h4 id="替换原理"><a href="#替换原理" class="headerlink" title="替换原理"></a>替换原理</h4><p>glibc中的memory-allocation方法均被为声明为<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Weak_symbol">弱符号</a>，只需要在tcmalloc中将其重新定义即可。 具体的重新定义代码在src&#x2F;libc_override*.h中(不同平台实现不同)，下面是Linux平台下部分memory-allocation函数的重新定义实现：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-function"><span class="hljs-type">void</span>* <span class="hljs-keyword">operator</span> <span class="hljs-title">new</span><span class="hljs-params">(<span class="hljs-type">size_t</span> size)</span>                  </span>&#123; <span class="hljs-keyword">return</span> <span class="hljs-built_in">tc_new</span>(size);       &#125;<br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-keyword">operator</span> <span class="hljs-title">delete</span><span class="hljs-params">(<span class="hljs-type">void</span>* p)</span> __THROW            </span>&#123; <span class="hljs-built_in">tc_delete</span>(p);              &#125;<br><span class="hljs-type">void</span>* <span class="hljs-keyword">operator</span> <span class="hljs-keyword">new</span>[](<span class="hljs-type">size_t</span> size)                &#123; <span class="hljs-keyword">return</span> <span class="hljs-built_in">tc_newarray</span>(size);  &#125;<br><span class="hljs-type">void</span> <span class="hljs-keyword">operator</span> <span class="hljs-keyword">delete</span>[](<span class="hljs-type">void</span>* p) __THROW          &#123; <span class="hljs-built_in">tc_deletearray</span>(p);         &#125;<br><span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;C&quot;</span> &#123;<br>  <span class="hljs-function"><span class="hljs-type">void</span>* <span class="hljs-title">malloc</span><span class="hljs-params">(<span class="hljs-type">size_t</span> s)</span> __THROW                 </span>&#123; <span class="hljs-keyword">return</span> <span class="hljs-built_in">tc_malloc</span>(s);       &#125;<br>  <span class="hljs-function"><span class="hljs-type">void</span>  <span class="hljs-title">free</span><span class="hljs-params">(<span class="hljs-type">void</span>* p)</span> __THROW                    </span>&#123; <span class="hljs-built_in">tc_free</span>(p);                &#125;<br>  <span class="hljs-function"><span class="hljs-type">void</span>* <span class="hljs-title">realloc</span><span class="hljs-params">(<span class="hljs-type">void</span>* p, <span class="hljs-type">size_t</span> s)</span> __THROW       </span>&#123; <span class="hljs-keyword">return</span> <span class="hljs-built_in">tc_realloc</span>(p, s);   &#125;<br>  <span class="hljs-function"><span class="hljs-type">void</span>* <span class="hljs-title">calloc</span><span class="hljs-params">(<span class="hljs-type">size_t</span> n, <span class="hljs-type">size_t</span> s)</span> __THROW       </span>&#123; <span class="hljs-keyword">return</span> <span class="hljs-built_in">tc_calloc</span>(n, s);    &#125;<br>  <span class="hljs-function"><span class="hljs-type">void</span>  <span class="hljs-title">cfree</span><span class="hljs-params">(<span class="hljs-type">void</span>* p)</span> __THROW                   </span>&#123; <span class="hljs-built_in">tc_cfree</span>(p);               &#125;<br>&#125;  <span class="hljs-comment">// extern &quot;C&quot;</span><br></code></pre></td></tr></table></figure>
+
+<h4 id="整体结构"><a href="#整体结构" class="headerlink" title="整体结构"></a>整体结构</h4><p><img src="https://qnwang.oss-cn-hangzhou.aliyuncs.com/internship/20250518171450479.png" srcset="/blog/img/loading.gif" lazyload alt="结构图"></p>
+<p>上图展示了tcmalloc的整体结构, tcmalloc主要由三个组件组成：ThreadCache、CentralFreeList及PageHeap。 其中：</p>
+<ul>
+<li>ThreadCache: 线程缓存，它是一个TSL(线程本地存储)对象，尺寸小于256K的小内存申请均由ThreadCache进行分配；通过ThreadCache分配过程中不需要任何锁，可以极大的提高分配速度</li>
+<li>PageHeap: 中央堆分配器，被所有线程共享(分配时需要全局锁定)，负责与操作系统的直接交互(申请及释放内存)，并且大尺寸的内存申请直接通过PageHeap进行分配</li>
+<li>CentralFreeList：作为PageHeap与ThreadCache的中间人，负责<ol>
+<li>将PageHeap中的内存切分为小块，在恰当时机分配给ThreadCache。</li>
+<li>获取从ThreadCache中回收的内存并在恰当的时机将部分内存归还给PageHeap</li>
+</ol>
+</li>
+</ul>
+<h4 id="核心思想：Segregated-Free-List-离散式空闲列表"><a href="#核心思想：Segregated-Free-List-离散式空闲列表" class="headerlink" title="核心思想：Segregated Free List(离散式空闲列表)"></a>核心思想：Segregated Free List(离散式空闲列表)</h4><p><img src="https://qnwang.oss-cn-hangzhou.aliyuncs.com/internship/20250518171727566.png" srcset="/blog/img/loading.gif" lazyload alt="结构图"></p>
+<h5 id="小内存分配：ThreadCache"><a href="#小内存分配：ThreadCache" class="headerlink" title="小内存分配：ThreadCache"></a>小内存分配：ThreadCache</h5><p>tcmalloc实现中，每个thread独立维护了各自的离散式空闲列表，它的核心结构如下：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-keyword">class</span> <span class="hljs-title class_">FreeList</span> &#123;<br><span class="hljs-keyword">private</span>:<br> <span class="hljs-type">void</span>*    list_;<br> <span class="hljs-type">uint32_t</span> length_;<br> <span class="hljs-type">uint32_t</span> lowater_;<br> <span class="hljs-type">uint32_t</span> max_length_;<br>&#125;;<br><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">ThreadCache</span> &#123;<br><span class="hljs-keyword">private</span>:<br>     FreeList      list_[kNumClasses];    <br>&#125;;<br></code></pre></td></tr></table></figure>
+
+<pre><code class=" mermaid">flowchart TD
+    A[请求分配小内存] --&gt; B[通过 SizeMap 获取 size class 和 object size]
+    B --&gt; C&#123;ThreadCache 中的 free list 是否为空？&#125;
+    C -- 是 --&gt; D[从 free list 中取出第一个 object 返回]
+    C -- 否 --&gt; E[从 CentralFreeList 获取若干 object]
+    E --&gt; F[取出一个 object 返回，剩下的放入 ThreadCache]
+    E --&gt; G&#123;CentralFreeList 是否也不够？&#125;
+    G -- 是 --&gt; H[CentralFreeList 向 PageHeap 申请一串页面（Span）]
+    H --&gt; I[切割页面为多个 object]
+    I --&gt; J[将部分 object 转移给 ThreadCache]
+    J --&gt; F
+    G -- 否 --&gt; F
+</code></pre>
+
+<h5 id="大内存分配：PageHeap"><a href="#大内存分配：PageHeap" class="headerlink" title="大内存分配：PageHeap"></a>大内存分配：PageHeap</h5><p>PageHeap的职能之一是向操作系统申请内存，与大多数现代分配器一样，tcmalloc使用基于页的分配方式，即每次至少像系统申请1页空间。tcmalloc中定义的页大小为8K个字节(多数linux系统中一页大小为4K字节，也就是说tcmalloc中的一页对应linux中两页)。 虽然PageHeap是按页申请内存，但是它管理内存的基本单位为Span(跨度)，Span对象代表了表示连续的页面。 如下图所示，分别有a，b，c，d四个Span；a占据了2个页面，b占据了1个页面，c占据了4个页面，d占据了3个页面。</p>
+<p><img src="https://qnwang.oss-cn-hangzhou.aliyuncs.com/internship/20250518172159207.png" srcset="/blog/img/loading.gif" lazyload alt="结构图"></p>
+<p>下面是Span的定义</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-keyword">struct</span> <span class="hljs-title class_">Span</span> &#123;<br>  PageID        start;          <span class="hljs-comment">// Span描述的内存的起始地址</span><br>  Length        length;         <span class="hljs-comment">// Span页面数量</span><br>  Span*         next;           <span class="hljs-comment">// Span由双向链表组成，PageHeap和CentralFreeList中都用的到</span><br>  Span*         prev;           <span class="hljs-comment">//</span><br>  <span class="hljs-type">void</span>*         objects;        <span class="hljs-comment">// Span会在CentralFreeList中拆分成由object组成的free list</span><br>  <span class="hljs-type">unsigned</span> <span class="hljs-type">int</span>  refcount : <span class="hljs-number">16</span>;  <span class="hljs-comment">// Span的object被引用次数，当refcount=0时，表示此Span没有被使用</span><br>  <span class="hljs-type">unsigned</span> <span class="hljs-type">int</span>  sizeclass : <span class="hljs-number">8</span>;  <span class="hljs-comment">// Span属于的size class</span><br>  <span class="hljs-type">unsigned</span> <span class="hljs-type">int</span>  location : <span class="hljs-number">2</span>;   <span class="hljs-comment">// Span在的位置IN_USE？normal？returned？</span><br>  <span class="hljs-type">unsigned</span> <span class="hljs-type">int</span>  sample : <span class="hljs-number">1</span>;     <span class="hljs-comment">// Sampled object?</span><br>  <span class="hljs-comment">// What freelist the span is on: IN_USE if on none, or normal or returned</span><br>  <span class="hljs-keyword">enum</span> &#123; IN_USE, ON_NORMAL_FREELIST, ON_RETURNED_FREELIST &#125;;<br>&#125;;<br></code></pre></td></tr></table></figure>
+
+<p>来看下PageHeap的主要结构及示意图：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs c++">PageMap pagemap_; <span class="hljs-comment">// page id 到 Span的映射</span><br><br><span class="hljs-keyword">struct</span> <span class="hljs-title class_">SpanList</span> &#123;<br>   Span        normal;<br>   Span        returned;<br>&#125;;<br><br>SpanList large_;<br><br>SpanList free_[kMaxPages]; <span class="hljs-comment">// kMaxPages = 128</span><br></code></pre></td></tr></table></figure>
+
+<p><img src="https://qnwang.oss-cn-hangzhou.aliyuncs.com/internship/20250518172237981.png" srcset="/blog/img/loading.gif" lazyload alt="结构图"></p>
+<h5 id="中间人：CentralFreeList"><a href="#中间人：CentralFreeList" class="headerlink" title="中间人：CentralFreeList"></a>中间人：CentralFreeList</h5><p>tcmalloc为每个size class设置设置了一个CentralFreeList(中央自由列表)，ThreadCache之间共享这些CentralFreeList</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-type">static</span> CentralFreeListPadded central_cache_[kNumClasses];<br> <span class="hljs-keyword">class</span> <span class="hljs-title class_">CentralFreeList</span> &#123;<br> <span class="hljs-keyword">private</span>:<br>     SpinLock lock_;<br>     <span class="hljs-type">size_t</span> size_class_;<br>     Span empty_;       <br>     Span nonempty_;<br> &#125;;<br></code></pre></td></tr></table></figure>
+
+<p>作为中间人，CentralFreeList的功能之一就是从PageHeap中取出部分Span并按照预定大小(SizeMap中定义)将其拆分成大小固定的object供ThreadCache共享；</p>
+<pre><code class=" mermaid">flowchart TD
+  A[从 PageHeap 获取 Span] --&gt; B[RegisterSizeClass&lt;br/&gt;设置location和sizeclass]
+  B --&gt; C[Span 切分为 objects&lt;br/&gt;挂到 Span::objects 链表]
+  C --&gt; D[挂到 CentralFreeList::nonempty_]
+
+  E[ThreadCache 请求 object] --&gt; F[从 nonempty_ Span 取 object]
+  F --&gt; G[refcount += 1]
+
+  F --&gt;|Span 空| H[从 nonempty_ 移除&lt;br/&gt;挂到 empty_]
+
+  I[ThreadCache 归还 object] --&gt; J[添加 object 到 Span::objects]
+  J --&gt; K[refcount -= 1]
+
+  K --&gt;|refcount == 0| L[&quot;从链表移除&lt;br/&gt;PageHeap::Delete(Span)&quot;]
+  K --&gt;|Span 在 empty_| M[挂回 nonempty_]
+</code></pre>
+
+
+
+<pre><code class=" mermaid">sequenceDiagram
+  participant CentralFreeList
+  participant PageHeap
+  participant Span
+  participant ThreadCache
+
+  Note over CentralFreeList: 从 PageHeap 获取 Span
+  CentralFreeList-&gt;&gt;PageHeap: Request Span
+  PageHeap--&gt;&gt;CentralFreeList: Return Span
+  CentralFreeList-&gt;&gt;Span: RegisterSizeClass (location=IN_USE, sizeclass=X)
+  CentralFreeList-&gt;&gt;Span: Split Span into objects (free list)
+  CentralFreeList-&gt;&gt;CentralFreeList: Add Span to nonempty_ list
+
+  Note over ThreadCache: 从 CentralFreeList 分配 object
+  ThreadCache-&gt;&gt;CentralFreeList: Request object
+  CentralFreeList-&gt;&gt;Span: Get object from free list
+  Span-&gt;&gt;Span: refcount++
+
+  alt No object left in Span
+    CentralFreeList-&gt;&gt;CentralFreeList: Move Span to empty_ list
+  end
+
+  Note over ThreadCache: 归还 object 给 CentralFreeList
+  ThreadCache-&gt;&gt;CentralFreeList: Return object
+  CentralFreeList-&gt;&gt;Span: Add object back to free list
+  Span-&gt;&gt;Span: refcount--
+
+  alt refcount == 0
+    CentralFreeList-&gt;&gt;CentralFreeList: Remove Span from list
+    CentralFreeList-&gt;&gt;PageHeap: Delete(Span)
+  else Span in empty_
+    CentralFreeList-&gt;&gt;CentralFreeList: Move Span to nonempty_ list
+  end
+</code></pre>
+
+<h3 id="cpu-profiler"><a href="#cpu-profiler" class="headerlink" title="cpu profiler"></a>cpu profiler</h3><h4 id="介绍-1"><a href="#介绍-1" class="headerlink" title="介绍"></a>介绍</h4><p>这是最初由 Google 开发的 CPU 分析器。使用方法分为三个部分：将库链接到应用程序、运行代码以及分析输出。</p>
+<h4 id="工作流程"><a href="#工作流程" class="headerlink" title="工作流程"></a>工作流程</h4><pre><code class=" mermaid">flowchart TD
+    Start([程序开始运行])
+    InitProfiler[初始化 Profiler&lt;br&gt;（ProfilerStart）]
+    SetupSignal[设置定时器&lt;br&gt;定期触发 SIGPROF 信号]
+    InstallHandler[安装 SIGPROF 的信号处理器&lt;br&gt;（ProfilerSignalHandler）]
+    Wait[程序继续运行，等待采样时刻]
+    OnSignal[定时器触发 SIGPROF 信号]
+    GetPC[信号处理器中获取当前函数调用地址&lt;br&gt;使用 backtrace 等方法]
+    RecordSample[记录当前调用栈&lt;br&gt;写入 profile 数据结构]
+    WriteToFile[周期性写入 profile 数据文件]
+    StopProfiler[ProfilerStop 停止分析，关闭文件]
+    End([程序结束运行])
+
+    Start --&gt; InitProfiler --&gt; SetupSignal --&gt; InstallHandler --&gt; Wait
+    Wait --&gt; OnSignal --&gt; GetPC --&gt; RecordSample --&gt; Wait
+    RecordSample --&gt; WriteToFile --&gt; Wait
+    Wait --&gt; StopProfiler --&gt; End
+  classDef important fill:#fff3e0,stroke:#ff9800,stroke-width:2px;
+</code></pre>
+
+<h4 id="关键源码"><a href="#关键源码" class="headerlink" title="关键源码"></a>关键源码</h4><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-comment">// 启动 CPU Profiler，采样逻辑主入口</span><br><span class="hljs-keyword">extern</span> “C” <span class="hljs-function">PERFTOOLS_DLL_DECL <span class="hljs-type">int</span> <span class="hljs-title">ProfilerStart</span><span class="hljs-params">(<span class="hljs-type">const</span> <span class="hljs-type">char</span>* fname)</span> </span>&#123;<br>    <span class="hljs-keyword">return</span> CpuProfiler::instance_.<span class="hljs-built_in">Start</span>(fname, <span class="hljs-literal">NULL</span>);<br>&#125;<br><span class="hljs-function"><span class="hljs-type">bool</span> <span class="hljs-title">CpuProfiler::Start</span><span class="hljs-params">(<span class="hljs-type">const</span> <span class="hljs-type">char</span>* fname, <span class="hljs-type">const</span> ProfilerOptions* options)</span> </span>&#123;<br>    collector_.<span class="hljs-built_in">Start</span>(fname, collector_options);<br>    <span class="hljs-comment">// Setup handler for SIGPROF interrupts</span><br>    <span class="hljs-built_in">EnableHandler</span>();<br>    <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;<br>&#125;<br><span class="hljs-comment">// 初始化数据收集需要的数据结构</span><br><span class="hljs-function"><span class="hljs-type">bool</span> <span class="hljs-title">ProfileData::Start</span><span class="hljs-params">(<span class="hljs-type">const</span> <span class="hljs-type">char</span>* fname, <span class="hljs-type">const</span> ProfileData::Options&amp; options)</span> </span>&#123;<br> <br>    <span class="hljs-comment">// Open output file and initialize various data structures</span><br>    <span class="hljs-type">int</span> fd =<span class="hljs-built_in">open</span>(fname, O_CREAT | O_WRONLY | O_TRUNC, <span class="hljs-number">0666</span>);<br>    start_time_ = <span class="hljs-built_in">time</span>(<span class="hljs-literal">NULL</span>);<br>    fname_ = <span class="hljs-built_in">strdup</span>(fname);<br> <br>    <span class="hljs-comment">// Reset counters</span><br>    num_evicted_ = <span class="hljs-number">0</span>;<br>    count_ = <span class="hljs-number">0</span>;<br>    evictions_ = <span class="hljs-number">0</span>;<br>    total_bytes_ = <span class="hljs-number">0</span>;<br> <br>    hash_ = <span class="hljs-keyword">new</span> Bucket[kBuckets];<br>    evict_ = <span class="hljs-keyword">new</span> Slot[kBufferLength];<br>    <span class="hljs-built_in">memset</span>(hash_, <span class="hljs-number">0</span>, <span class="hljs-built_in">sizeof</span>(hash_[<span class="hljs-number">0</span>]) * kBuckets);<br> <br>    <span class="hljs-comment">// Record special entries</span><br>    evict_[num_evicted_++] = <span class="hljs-number">0</span>; <span class="hljs-comment">// count for header</span><br>    evict_[num_evicted_++] = <span class="hljs-number">3</span>; <span class="hljs-comment">// depth for header</span><br>    evict_[num_evicted_++] = <span class="hljs-number">0</span>; <span class="hljs-comment">// Version number</span><br>    <span class="hljs-built_in">CHECK_NE</span>(<span class="hljs-number">0</span>, options.<span class="hljs-built_in">frequency</span>());<br>    <span class="hljs-type">int</span> period =<span class="hljs-number">1000000</span>/ options.<span class="hljs-built_in">frequency</span>();<br>    evict_[num_evicted_++] = period; <span class="hljs-comment">// Period (microseconds)</span><br>    evict_[num_evicted_++] = <span class="hljs-number">0</span>; <span class="hljs-comment">// Padding</span><br>    out_ = fd;<br>    <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;<br>&#125;<br><br><span class="hljs-comment">// 把prof_handler这个函数注册到了某个地方</span><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">CpuProfiler::EnableHandler</span><span class="hljs-params">()</span> </span>&#123;<br>    prof_handler_token_ = <span class="hljs-built_in">ProfileHandlerRegisterCallback</span>(prof_handler, <span class="hljs-keyword">this</span>);<br>&#125;<br><span class="hljs-function">ProfileHandlerToken* <span class="hljs-title">ProfileHandlerRegisterCallback</span><span class="hljs-params">(</span></span><br><span class="hljs-params"><span class="hljs-function">    ProfileHandlerCallback callback, <span class="hljs-type">void</span>* callback_arg)</span> </span>&#123;<br>    <span class="hljs-keyword">return</span> ProfileHandler::<span class="hljs-built_in">Instance</span>()-&gt;<span class="hljs-built_in">RegisterCallback</span>(callback, callback_arg);<br>&#125;<br><span class="hljs-comment">// 根据环境变量CPUPROFILE_REALTIME的配置，来决定让SIGPROF还是SIGALRM信号来触发SignalHandler信号处理函数，并根据环境变量CPUPROFILE_FREQUENCY的配置来设置自己的一个频率变量 frequency_</span><br>ProfileHandler::<span class="hljs-built_in">ProfileHandler</span>() &#123;<br> <br>    timer_type_ = (<span class="hljs-built_in">getenv</span>(“CPUPROFILE_REALTIME”) ? ITIMER_REAL : ITIMER_PROF);<br>    signal_number_ = (timer_type_ == ITIMER_PROF ? SIGPROF : SIGALRM);<br> <br>    <span class="hljs-comment">// Get frequency of interrupts (if specified)</span><br>    <span class="hljs-type">char</span> junk;<br>    constchar* fr =<span class="hljs-built_in">getenv</span>(“CPUPROFILE_FREQUENCY”);<br> <br>    <span class="hljs-keyword">if</span> (fr != <span class="hljs-literal">NULL</span> &amp;&amp; (<span class="hljs-built_in">sscanf</span>(fr, <span class="hljs-string">&quot;%u%c&quot;</span>, &amp;frequency_, &amp;junk) == <span class="hljs-number">1</span>) &amp;&amp; (frequency_ &gt; <span class="hljs-number">0</span>)) &#123;<br>        <span class="hljs-comment">// Limit to kMaxFrequency</span><br>        frequency_ = (frequency_ &gt; kMaxFrequency) ? kMaxFrequency : frequency_;<br>    &#125; <span class="hljs-keyword">else</span> &#123;<br>        frequency_ = kDefaultFrequency;<br>    &#125;<br> <br>    <span class="hljs-comment">// Install the signal handler.</span><br>    structsigaction sa;<br>    sa.sa_sigaction = SignalHandler;<br>    sa.sa_flags = SA_RESTART | SA_SIGINFO;<br>    <span class="hljs-built_in">sigemptyset</span>(&amp;sa.sa_mask);<br>    <span class="hljs-built_in">sigaction</span>(signal_number_, &amp;sa, <span class="hljs-literal">NULL</span>);<br>&#125;<br><span class="hljs-comment">// 加入第一个callback的时候调用StartTimer（）函数来启动定时器，然后调用EnableHander函数来开启回调</span><br><span class="hljs-function">ProfileHandlerToken* <span class="hljs-title">ProfileHandler::RegisterCallback</span><span class="hljs-params">(ProfileHandlerCallback callback, <span class="hljs-type">void</span>* callback_arg)</span> </span>&#123;<br> <br>    ProfileHandlerToken* token = <span class="hljs-keyword">new</span> <span class="hljs-built_in">ProfileHandlerToken</span>(callback, callback_arg);<br>    <span class="hljs-function">SpinLockHolder <span class="hljs-title">cl</span><span class="hljs-params">(&amp;control_lock_)</span></span>;<br>    <span class="hljs-built_in">DisableHandler</span>();<br>    &#123;<br>        <span class="hljs-function">SpinLockHolder <span class="hljs-title">sl</span><span class="hljs-params">(&amp;signal_lock_)</span></span>;<br>        callbacks_.<span class="hljs-built_in">push_back</span>(token);<br>    &#125;<br> <br>    <span class="hljs-comment">// Start the timer if timer is shared and this is a first callback.</span><br>    <span class="hljs-keyword">if</span> ((callback_count_ == <span class="hljs-number">0</span>) &amp;&amp; (timer_sharing_ == TIMERS_SHARED)) &#123;<br>        <span class="hljs-built_in">StartTimer</span>();<br>    &#125;<br>    ++callback_count_;<br>    <span class="hljs-built_in">EnableHandler</span>();<br>    <span class="hljs-keyword">return</span> token;<br>&#125;<br><span class="hljs-comment">// </span><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">ProfileHandler::StartTimer</span><span class="hljs-params">()</span> </span>&#123;<br>    <span class="hljs-keyword">struct</span> <span class="hljs-title class_">itimerval</span> timer;<br>    timer.it_interval.tv_sec = <span class="hljs-number">0</span>;<br>    timer.it_interval.tv_usec = <span class="hljs-number">1000000</span> / frequency_;<br>    timer.it_value = timer.it_interval;<br>    <span class="hljs-built_in">setitimer</span>(timer_type_, &amp;timer, <span class="hljs-number">0</span>);<br>&#125;<br><span class="hljs-comment">//</span><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">ProfileHandler::EnableHandler</span><span class="hljs-params">()</span> </span>&#123;<br>    <span class="hljs-keyword">struct</span> <span class="hljs-title class_">sigaction</span> sa;<br>    sa.sa_sigaction = SignalHandler;<br>    sa.sa_flags = SA_RESTART | SA_SIGINFO;<br>    <span class="hljs-built_in">sigemptyset</span>(&amp;sa.sa_mask);<br>    <span class="hljs-type">const</span> <span class="hljs-type">int</span> signal_number = (timer_type_ == ITIMER_PROF ? SIGPROF : SIGALRM);<br>    <span class="hljs-built_in">RAW_CHECK</span>(<span class="hljs-built_in">sigaction</span>(signal_number, &amp;sa, <span class="hljs-literal">NULL</span>) == <span class="hljs-number">0</span>, <span class="hljs-string">&quot;sigprof (enable)&quot;</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="heap-profiler"><a href="#heap-profiler" class="headerlink" title="heap profiler"></a>heap profiler</h3><h4 id="介绍-2"><a href="#介绍-2" class="headerlink" title="介绍"></a>介绍</h4><p>Heap Profiling 通常指对应用程序的堆分配进行收集或采样，来向我们报告程序的内存使用情况，以便分析内存占用原因或定位内存泄漏根源。</p>
+<h4 id="工作流程-1"><a href="#工作流程-1" class="headerlink" title="工作流程"></a>工作流程</h4><p><strong>Heap Profile 的 stack trace + statistics 数据模型与 CPU Proflie 是一致的</strong>。</p>
+<pre><code class=" mermaid">flowchart TD
+    A[&quot;HeapProfilerStart()&quot;] --&gt; B[初始化采样参数与文件输出路径]
+    B --&gt; C[注册 malloc/free hook]
+    C --&gt; D[用户程序 malloc]
+    D --&gt; E&#123;是否触发采样?&#125;:::important
+
+    E -- 否 --&gt; F[正常 malloc]
+    E -- 是 --&gt; G[记录采样信息]
+    
+    G --&gt; H[获取调用栈 stacktrace]
+    H --&gt; I[记录 size + stacktrace 到 ProfileTable]
+    I --&gt; J[继续 malloc 执行]
+    
+    J --&gt; K[用户程序运行中多次采样]
+
+    K --&gt; L[&quot;HeapProfilerDump() 或 Stop()&quot;]
+    L --&gt; M[导出 .heap 文件]
+    M --&gt; N[使用 pprof 工具进行分析]
+classDef important fill:#fff3e0,stroke:#ff9800,stroke-width:2px;
+</code></pre>
+
+
+
+<h4 id="关键源码-1"><a href="#关键源码-1" class="headerlink" title="关键源码"></a>关键源码</h4><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-comment">// 启动入口</span><br><span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;C&quot;</span> <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">HeapProfilerStart</span><span class="hljs-params">(<span class="hljs-type">const</span> <span class="hljs-type">char</span>* prefix)</span> </span>&#123;<br>  (<span class="hljs-type">void</span>)tcmalloc::<span class="hljs-built_in">GetProgramInvocationName</span>();<br>  <span class="hljs-function">SpinLockHolder <span class="hljs-title">l</span><span class="hljs-params">(&amp;heap_lock)</span></span>;<br>  <span class="hljs-keyword">if</span> (is_on) <span class="hljs-keyword">return</span>;<br>  is_on = <span class="hljs-literal">true</span>;<br>  <span class="hljs-built_in">RAW_VLOG</span>(<span class="hljs-number">0</span>, <span class="hljs-string">&quot;Starting tracking the heap&quot;</span>);<br>    <br>  MallocExtension::<span class="hljs-built_in">Initialize</span>();<br>  heap_profiler_memory = LowLevelAlloc::<span class="hljs-built_in">NewArena</span>();<br>  heap_profile = <span class="hljs-built_in">new</span>(<span class="hljs-built_in">ProfilerMalloc</span>(<span class="hljs-built_in">sizeof</span>(HeapProfileTable)))<br>      <span class="hljs-built_in">HeapProfileTable</span>(ProfilerMalloc, ProfilerFree);<br><br>  last_dump_alloc = <span class="hljs-number">0</span>;<br>  last_dump_free = <span class="hljs-number">0</span>;<br>  high_water_mark = <span class="hljs-number">0</span>;<br>  last_dump_time = <span class="hljs-number">0</span>;<br>    <br>  <span class="hljs-comment">// Now set the hooks that capture new/delete and malloc/free.</span><br>  <span class="hljs-built_in">RAW_CHECK</span>(MallocHook::<span class="hljs-built_in">AddNewHook</span>(&amp;NewHook), <span class="hljs-string">&quot;&quot;</span>);<br>  <span class="hljs-built_in">RAW_CHECK</span>(MallocHook::<span class="hljs-built_in">AddDeleteHook</span>(&amp;DeleteHook), <span class="hljs-string">&quot;&quot;</span>);<br>  ……<br>&#125;<br><span class="hljs-comment">// tcmalloc 在 malloc() 和 operator new 中增加了一些采样逻辑，当根据条件触发采样 hook 时，会执行以下函数</span><br><span class="hljs-comment">// Record an allocation in the profile.</span><br><span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">RecordAlloc</span><span class="hljs-params">(<span class="hljs-type">const</span> <span class="hljs-type">void</span>* ptr, <span class="hljs-type">size_t</span> bytes, <span class="hljs-type">int</span> skip_count)</span> </span>&#123;<br>  <span class="hljs-comment">// Take the stack trace outside the critical section.</span><br><span class="hljs-type">void</span>* stack[HeapProfileTable::kMaxStackDepth];<br>  <span class="hljs-type">int</span> depth = HeapProfileTable::<span class="hljs-built_in">GetCallerStackTrace</span>(skip_count + <span class="hljs-number">1</span>, stack);<br>  <span class="hljs-function">SpinLockHolder <span class="hljs-title">l</span><span class="hljs-params">(&amp;heap_lock)</span></span>;<br>  <span class="hljs-keyword">if</span> (is_on) &#123;<br>    heap_profile-&gt;<span class="hljs-built_in">RecordAlloc</span>(ptr, bytes, depth, stack);<br>    <span class="hljs-built_in">MaybeDumpProfileLocked</span>();<br>  &#125;<br>&#125;<br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">HeapProfileTable::RecordAlloc</span><span class="hljs-params">(</span></span><br><span class="hljs-params"><span class="hljs-function">    <span class="hljs-type">const</span> <span class="hljs-type">void</span>* ptr, <span class="hljs-type">size_t</span> bytes, <span class="hljs-type">int</span> stack_depth,</span></span><br><span class="hljs-params"><span class="hljs-function">    <span class="hljs-type">const</span> <span class="hljs-type">void</span>* <span class="hljs-type">const</span> call_stack[])</span> </span>&#123;<br>  Bucket* b = <span class="hljs-built_in">GetBucket</span>(stack_depth, call_stack);<br>  b-&gt;allocs++;<br>  b-&gt;alloc_size += bytes;<br>  total_.allocs++;<br>  total_.alloc_size += bytes;<br>  AllocValue v;<br>  v.<span class="hljs-built_in">set_bucket</span>(b);  <span class="hljs-comment">// also did set_live(false); set_ignore(false)</span><br>  v.bytes = bytes;<br>  address_map_-&gt;<span class="hljs-built_in">Insert</span>(ptr, v);<br>&#125;<br><span class="hljs-comment">// 在 free() 或 operator delete 中同样需要增加一些逻辑来记录内存释放情况</span><br><span class="hljs-comment">// Record a deallocation in the profile.</span><br><span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">RecordFree</span><span class="hljs-params">(<span class="hljs-type">const</span> <span class="hljs-type">void</span>* ptr)</span> </span>&#123;<br>  <span class="hljs-function">SpinLockHolder <span class="hljs-title">l</span><span class="hljs-params">(&amp;heap_lock)</span></span>;<br>  <span class="hljs-keyword">if</span> (is_on) &#123;<br>    heap_profile-&gt;<span class="hljs-built_in">RecordFree</span>(ptr);<br>    <span class="hljs-built_in">MaybeDumpProfileLocked</span>();<br>  &#125;<br>&#125;<br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">HeapProfileTable::RecordFree</span><span class="hljs-params">(<span class="hljs-type">const</span> <span class="hljs-type">void</span>* ptr)</span> </span>&#123;<br>  AllocValue v;<br>  <span class="hljs-keyword">if</span> (address_map_-&gt;<span class="hljs-built_in">FindAndRemove</span>(ptr, &amp;v)) &#123;<br>    Bucket* b = v.<span class="hljs-built_in">bucket</span>();<br>    b-&gt;frees++;<br>    b-&gt;free_size += v.bytes;<br>    total_.frees++;<br>    total_.free_size += v.bytes;<br>  &#125;<br>&#125;<br><span class="hljs-comment">// 调用 GetCallerStackTrace() 获取调用栈。</span><br><span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;C&quot;</span> <span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">MallocHook_GetCallerStackTrace</span><span class="hljs-params">(<span class="hljs-type">void</span>** result, <span class="hljs-type">int</span> max_depth,</span></span><br><span class="hljs-params"><span class="hljs-function">                                              <span class="hljs-type">int</span> skip_count)</span> </span>&#123;<br><span class="hljs-meta">#<span class="hljs-keyword">if</span> defined(NO_TCMALLOC_SAMPLES)</span><br>  <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br><span class="hljs-meta">#<span class="hljs-keyword">else</span></span><br>  <span class="hljs-keyword">if</span> (max_depth &lt; <span class="hljs-number">1</span>) &#123;<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>  &#125;<br>  <span class="hljs-type">int</span> retval = tcmalloc::<span class="hljs-built_in">GrabBacktrace</span>(result, max_depth, skip_count);<br>  <span class="hljs-comment">// prevent tail-call above</span><br>  *(<span class="hljs-type">void</span>* <span class="hljs-keyword">volatile</span> *)result;<br>  <span class="hljs-keyword">return</span> retval;<br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br>&#125;<br><span class="hljs-comment">// </span><br></code></pre></td></tr></table></figure>
+
+
+
+<h2 id="六、实战案例与分析"><a href="#六、实战案例与分析" class="headerlink" title="六、实战案例与分析"></a>六、实战案例与分析</h2><h3 id="案例-1：使用-tcmalloc-优化内存"><a href="#案例-1：使用-tcmalloc-优化内存" class="headerlink" title="案例 1：使用 tcmalloc 优化内存"></a><strong>案例 1：使用 tcmalloc 优化内存</strong></h3><ul>
+<li>比较 <code>malloc</code> 和 <code>tcmalloc</code> 在高频次分配下的性能差异。</li>
+<li>分析内存碎片、内存占用的变化。</li>
+</ul>
+<h3 id="案例-2：使用-CPU-Profiler-分析热点"><a href="#案例-2：使用-CPU-Profiler-分析热点" class="headerlink" title="案例 2：使用 CPU Profiler 分析热点"></a><strong>案例 2：使用 CPU Profiler 分析热点</strong></h3><ul>
+<li>编写一个包含复杂运算的程序，用 <code>CPU Profiler</code> 查找 CPU 使用的瓶颈函数。</li>
+<li>使用火焰图进行可视化分析，优化计算热点。</li>
+</ul>
+<h3 id="案例-3：内存泄漏定位与修复"><a href="#案例-3：内存泄漏定位与修复" class="headerlink" title="案例 3：内存泄漏定位与修复"></a><strong>案例 3：内存泄漏定位与修复</strong></h3><ul>
+<li>故意写一个内存泄漏示例，使用 <code>Heap Profiler</code> 进行检测，定位泄漏源并修复。</li>
+</ul>
+<h2 id="七、常见问题与坑"><a href="#七、常见问题与坑" class="headerlink" title="七、常见问题与坑"></a>七、常见问题与坑</h2><ul>
+<li><strong>性能开销</strong>：启用 <code>gperftools</code> 后会带来一定的性能开销，尤其是在高负载时。要注意选择合适的 profiling 级别。</li>
+<li><strong>与其他库的兼容性</strong>：某些情况下，<code>tcmalloc</code> 与第三方库的内存分配可能会发生冲突，需要根据具体情况选择关闭。</li>
+<li><strong>内存泄漏的误报</strong>：<code>Heap Profiler</code> 有时会报告不准确的内存泄漏，需要结合代码逐步排查。</li>
+</ul>
+<h2 id="八、总结与心得"><a href="#八、总结与心得" class="headerlink" title="八、总结与心得"></a>八、总结与心得</h2><ul>
+<li><strong>优点</strong>：<ul>
+<li>高效的内存管理，适合高性能应用。</li>
+<li>支持详细的性能分析，帮助定位 CPU 和内存瓶颈。</li>
+</ul>
+</li>
+<li><strong>缺点</strong>：<ul>
+<li>使用时有性能开销，建议仅在开发和调试阶段启用。</li>
+<li>配置较为复杂，需要一定的学习曲线。</li>
+</ul>
+</li>
+<li><strong>实用性</strong>：<ul>
+<li>在高性能要求的 C++ 项目中使用 <code>gperftools</code>，可以大幅提升内存管理效率和 CPU 性能。</li>
+</ul>
+</li>
+</ul>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/blog/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" class="category-chain-item">数据结构与算法</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/blog/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" class="print-no-link">#学习笔记</a>
+      
+        <a href="/blog/tags/%E7%AE%97%E6%B3%95/" class="print-no-link">#算法</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>gperftools（Google 提供的开源性能优化工具集）</div>
+      <div>https://ruanqingxuan.github.io/blog/2025/09/17/gperftools（Google 提供的开源性能优化工具集）/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>John Doe</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年9月17日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/blog/2025/09/17/ASAN%E3%80%81valgrind%EF%BC%88%E5%86%85%E5%AD%98%E6%B3%84%E9%9C%B2%E7%9A%84%E6%A3%80%E6%B5%8B%E5%B7%A5%E5%85%B7%EF%BC%89/" title="ASAN、valgrind（内存泄露的检测工具）">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">ASAN、valgrind（内存泄露的检测工具）</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/blog/2025/09/17/tools_comparison/" title="性能分析工具对比分析（开源 vs 商业）">
+                        <span class="hidden-mobile">性能分析工具对比分析（开源 vs 商业）</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/blog/js/events.js" ></script>
+<script  src="/blog/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/blog/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/blog/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/blog/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

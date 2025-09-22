@@ -1,0 +1,1227 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/blog/img/fluid.png">
+  <link rel="icon" href="/blog/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="John Doe">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="ASAN、valgrind（内存泄露的检测工具）一、工具概览ASan什么是 AddressSanitizer？AddressSanitizer（又名 ASan）是一款适用于 C&#x2F;C++ 的内存错误检测器。 主要检测什么问题？ASan可以检测出程序中不合理的内存使用行为，主要包括以下行为：    错误行为 简介    global buffer overflow 全局内存访问越界   he">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ASAN、valgrind（内存泄露的检测工具）">
+<meta property="og:url" content="https://ruanqingxuan.github.io/blog/2025/09/17/ASAN%E3%80%81valgrind%EF%BC%88%E5%86%85%E5%AD%98%E6%B3%84%E9%9C%B2%E7%9A%84%E6%A3%80%E6%B5%8B%E5%B7%A5%E5%85%B7%EF%BC%89/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="ASAN、valgrind（内存泄露的检测工具）一、工具概览ASan什么是 AddressSanitizer？AddressSanitizer（又名 ASan）是一款适用于 C&#x2F;C++ 的内存错误检测器。 主要检测什么问题？ASan可以检测出程序中不合理的内存使用行为，主要包括以下行为：    错误行为 简介    global buffer overflow 全局内存访问越界   he">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://qnwang.oss-cn-hangzhou.aliyuncs.com/internship/20250514220252808.png">
+<meta property="og:image" content="https://qnwang.oss-cn-hangzhou.aliyuncs.com/internship/20250509144807842.png">
+<meta property="og:image" content="https://qnwang.oss-cn-hangzhou.aliyuncs.com/internship/20250509150159067.jpeg">
+<meta property="og:image" content="https://qnwang.oss-cn-hangzhou.aliyuncs.com/internship/20250509171919962.png">
+<meta property="og:image" content="https://qnwang.oss-cn-hangzhou.aliyuncs.com/internship/20250426221902305.png">
+<meta property="article:published_time" content="2025-09-17T12:00:00.000Z">
+<meta property="article:modified_time" content="2025-09-17T11:44:03.061Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="学习笔记">
+<meta property="article:tag" content="算法">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://qnwang.oss-cn-hangzhou.aliyuncs.com/internship/20250514220252808.png">
+  
+  
+  
+  <title>ASAN、valgrind（内存泄露的检测工具） - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/blog/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/blog/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/blog/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"ruanqingxuan.github.io","root":"/blog/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/blog/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/blog/js/utils.js" ></script>
+  <script  src="/blog/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/blog/">
+      <strong>阮请玄的blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/blog/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/blog/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/blog/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/blog/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/blog/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/blog/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="ASAN、valgrind（内存泄露的检测工具）"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-09-17 20:00" pubdate>
+          2025年9月17日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          7.6k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          64 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">ASAN、valgrind（内存泄露的检测工具）</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="ASAN、valgrind（内存泄露的检测工具）"><a href="#ASAN、valgrind（内存泄露的检测工具）" class="headerlink" title="ASAN、valgrind（内存泄露的检测工具）"></a>ASAN、valgrind（内存泄露的检测工具）</h1><h2 id="一、工具概览"><a href="#一、工具概览" class="headerlink" title="一、工具概览"></a>一、工具概览</h2><h3 id="ASan"><a href="#ASan" class="headerlink" title="ASan"></a>ASan</h3><h4 id="什么是-AddressSanitizer？"><a href="#什么是-AddressSanitizer？" class="headerlink" title="什么是 AddressSanitizer？"></a>什么是 AddressSanitizer？</h4><p><a target="_blank" rel="noopener" href="https://github.com/google/sanitizers/wiki/AddressSanitizer">AddressSanitizer</a>（又名 ASan）是一款适用于 C&#x2F;C++ 的内存错误检测器。</p>
+<h4 id="主要检测什么问题？"><a href="#主要检测什么问题？" class="headerlink" title="主要检测什么问题？"></a>主要检测什么问题？</h4><p>ASan可以检测出程序中不合理的内存使用行为，主要包括以下行为：</p>
+<table>
+<thead>
+<tr>
+<th><strong>错误行为</strong></th>
+<th><strong>简介</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>global buffer overflow</td>
+<td>全局内存访问越界</td>
+</tr>
+<tr>
+<td>heap buffer overflow</td>
+<td>堆内存访问越界<a target="_blank" rel="noopener" href="https://github.com/google/sanitizers/wiki/AddressSanitizerExampleHeapOutOfBounds">github.com</a></td>
+</tr>
+<tr>
+<td>initialization order bugs</td>
+<td>全局变量初始化顺序异常全局变量初始化间存在依赖，导致实际运行时因初始化顺序问题导致的初始值异常</td>
+</tr>
+<tr>
+<td>memory leaks</td>
+<td>内存泄漏在程序正常退出时输出报告</td>
+</tr>
+<tr>
+<td>stack buffer overflow</td>
+<td>栈内存访问越界</td>
+</tr>
+<tr>
+<td>use after free</td>
+<td>访问已经释放的内存，在释放内存后仍然尝试访问此内存<a target="_blank" rel="noopener" href="https://github.com/google/sanitizers/wiki/AddressSanitizerExampleUseAfterFree">AddressSanitizerExampleUseAfterFree · google&#x2F;sanitizers Wiki</a></td>
+</tr>
+<tr>
+<td>use after return</td>
+<td>访问生命周期结束的对象在函数退出后尝试访问函数内声明的局部变量</td>
+</tr>
+<tr>
+<td>user after scope</td>
+<td>访问生命周期结束的对象在”{}”包起来的代码块外访问代码块内声明的局部变量</td>
+</tr>
+</tbody></table>
+<h3 id="Valgrind"><a href="#Valgrind" class="headerlink" title="Valgrind"></a>Valgrind</h3><h4 id="什么是-Valgrind（重点是-Memcheck）？"><a href="#什么是-Valgrind（重点是-Memcheck）？" class="headerlink" title="什么是 Valgrind（重点是 Memcheck）？"></a>什么是 Valgrind（重点是 Memcheck）？</h4><p>Valgrind 是一个用于构建动态分析工具的插桩框架。Valgrind 中的一些工具可以自动检测许多内存管理和线程错误，并详细分析您的程序。还可以使用 Valgrind 构建新的工具。</p>
+<p>Valgrind 发行版目前包含七个生产级工具：一个内存错误检测器、两个线程错误检测器、一个缓存和分支预测分析器、一个调用图生成缓存和分支预测分析器，以及两个不同的堆分析器。其中最受欢迎的工具是 Memcheck。它可以检测 C 和 C++ 程序中常见的许多内存相关错误，这些错误可能导致程序崩溃和不可预测的行为。</p>
+<h4 id="主要检测什么问题？-1"><a href="#主要检测什么问题？-1" class="headerlink" title="主要检测什么问题？"></a>主要检测什么问题？</h4><p>检测内存泄露，数组越界等一些程序中常见的错误。特别的，它的 memcheck 工具能够检测内存泄漏、未初始化内存的使用和非法的内存访问。</p>
+<h2 id="二、原理机制"><a href="#二、原理机制" class="headerlink" title="二、原理机制"></a>二、原理机制</h2><h3 id="ASan工作机制"><a href="#ASan工作机制" class="headerlink" title="ASan工作机制"></a>ASan工作机制</h3><p>详细的工作原理官方文档：<a target="_blank" rel="noopener" href="https://github.com/google/sanitizers/wiki/AddressSanitizerAlgorithm">https://github.com/google/sanitizers/wiki/AddressSanitizerAlgorithm</a></p>
+<h4 id="工作原理"><a href="#工作原理" class="headerlink" title="工作原理"></a>工作原理</h4><p>Google ASan工具ASAN，全称 AddressSanitizer，也即地址消毒技术。可以用来检测内存问题，例如<a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=%E7%BC%93%E5%86%B2%E5%8C%BA%E6%BA%A2%E5%87%BA&spm=1001.2101.3001.7020">缓冲区溢出</a>或对悬空指针的非法访问等。<br>ASan主要是进行<a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=%E7%BC%96%E8%AF%91%E5%99%A8&spm=1001.2101.3001.7020">编译器</a>级别的HOOK与插桩,目前主流Clang，GCC，MSVC都支持，再结合运行时对影子内存的诊断输出，相当于双管齐下，整体效果不错；官方说是2倍左右性能开销，1&#x2F;8的内存到2倍的开销。</p>
+<p>AddressSanitizer主要包括两部分：插桩(Instrumentation)和动态运行库(Run-time library)。插桩主要是针对在llvm编译器级别对访问内存的操作(store，load，alloca等)，将它们进行处理。动态运行库主要提供一些运行时的复杂的功能(比如poison&#x2F;unpoison shadow memory)以及将malloc,free等系统调用函数hook住。</p>
+<h5 id="内存操作进行插桩"><a href="#内存操作进行插桩" class="headerlink" title="内存操作进行插桩"></a>内存操作进行插桩</h5><p>对new,malloc,delete,free,memcpy,其它内存访问等操作进行编译时替换与代码插入，是编译器完成的；加了ASAN相关的编译选项后，代码中的每一次内存访问操作都会被编译器修改为如下方式：</p>
+<p>编译前:</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs c++">*address = ...;    <span class="hljs-comment">// or   ... = *address;</span><br></code></pre></td></tr></table></figure>
+
+<p>编译后：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-keyword">if</span> (<span class="hljs-built_in">IsPoisoned</span>(address)) &#123; <span class="hljs-comment">// 判断内存是否中毒</span><br>  <span class="hljs-built_in">ReportError</span>(address, kAccessSize, kIsWrite);<br>&#125;<br>*address = ...;  <span class="hljs-comment">// or: ... = *address;</span><br></code></pre></td></tr></table></figure>
+
+<p>该方式的关键点就在于读写内存前会判断地址是否处于“中毒”状态，还有如何把<code>IsPoisoned</code>实现的非常快，把<code>ReportError</code>实现的非常紧凑，从而避免插入的代码过多。</p>
+<p>eg：</p>
+<p>未插桩的代码：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">foo</span><span class="hljs-params">()</span> </span>&#123;<br>  <span class="hljs-type">char</span> a[<span class="hljs-number">8</span>];<br>  ...<br>  <span class="hljs-keyword">return</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>插桩后的代码：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">foo</span><span class="hljs-params">()</span> </span>&#123;<br>  <span class="hljs-type">char</span> redzone1[<span class="hljs-number">32</span>];  <span class="hljs-comment">// 32-byte aligned</span><br>  <span class="hljs-type">char</span> a[<span class="hljs-number">8</span>];          <span class="hljs-comment">// 32-byte aligned</span><br>  <span class="hljs-type">char</span> redzone2[<span class="hljs-number">24</span>]; <br>  <span class="hljs-type">char</span> redzone3[<span class="hljs-number">32</span>];  <span class="hljs-comment">// 32-byte aligned</span><br>  <span class="hljs-type">int</span>  *shadow_base = <span class="hljs-built_in">MemToShadow</span>(redzone1);<br>  shadow_base[<span class="hljs-number">0</span>] = <span class="hljs-number">0xffffffff</span>;  <span class="hljs-comment">// poison redzone1</span><br>  shadow_base[<span class="hljs-number">1</span>] = <span class="hljs-number">0xffffff00</span>;  <span class="hljs-comment">// poison redzone2, unpoison &#x27;a&#x27;</span><br>  shadow_base[<span class="hljs-number">2</span>] = <span class="hljs-number">0xffffffff</span>;  <span class="hljs-comment">// poison redzone3</span><br>  ...<br>  shadow_base[<span class="hljs-number">0</span>] = shadow_base[<span class="hljs-number">1</span>] = shadow_base[<span class="hljs-number">2</span>] = <span class="hljs-number">0</span>; <span class="hljs-comment">// unpoison all</span><br>  <span class="hljs-keyword">return</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h5 id="内存映射与诊断"><a href="#内存映射与诊断" class="headerlink" title="内存映射与诊断"></a>内存映射与诊断</h5><p>按照一定的算法对原始内存进行一分影子内存的拷贝生成，目前不是1：1的拷贝，而是巧妙的按1&#x2F;8大小进行处理，并进行一定的下毒与标记，减少内存的浪费。正常访问内存前，先对影子内存进行检查访问，如果发现数据不对，就进行诊断报错处理。</p>
+<p>运行时库（libasan.so）malloc&#x2F;free函数进行了替换，在malloc函数中额外的分配了Redzone区域的内存，将与Redzone区域对应的影子内存加锁，主要的内存区域对应的影子内存不加锁。redzone 被标记为中毒状态，free函数将所有分配的内存区域加锁，并放到了隔离区域的队列中(保证在一定的时间内不会再被malloc函数分配)，并被标记为中毒状态。</p>
+<p><img src="https://qnwang.oss-cn-hangzhou.aliyuncs.com/internship/20250514220252808.png" srcset="/blog/img/loading.gif" lazyload alt="mapping图片"></p>
+<h5 id="防护缓冲区溢出的基本步骤"><a href="#防护缓冲区溢出的基本步骤" class="headerlink" title="防护缓冲区溢出的基本步骤"></a>防护缓冲区溢出的基本步骤</h5><p>中毒状态：内存对应的 shadow 区标记该内存不能访问的状态</p>
+<pre><code class=" mermaid">flowchart TD
+    A[创建 redzone&lt;br&gt;在全局变量、堆、栈前后插入&lt;br&gt;并标记为中毒状态] --&gt; B[建立影子内存区&lt;br&gt;8 字节内存对应 1 字节影子]
+    B --&gt; C[访问 redzone（如读写）&lt;br&gt;对应影子内存为中毒状态&lt;br&gt;触发报错]
+    C --&gt; D[报错信息：进程号、错误类型、&lt;br&gt;源文件名、行号、函数调用关系、&lt;br&gt;影子内存状态（出错部分中括号标注）]
+</code></pre>
+
+
+
+<h5 id="内存泄漏检测原理"><a href="#内存泄漏检测原理" class="headerlink" title="内存泄漏检测原理"></a>内存泄漏检测原理</h5><pre><code class=" mermaid">flowchart TD
+    A[&quot;ASAN 接管内存申请接口&lt;br&gt;(用户使用的内存全部由 ASAN 管理)&quot;] --&gt; B[&quot;进程退出时触发 ASAN 内存泄漏检测&lt;br&gt;(可通过复位、重启等方式触发)&quot;]
+    B --&gt; C[遍历所有未释放堆内存]
+    C --&gt; D&#123;该内存是否仍被引用？&#125;
+    D -- 是 --&gt; F[跳过，未泄漏]
+    D -- 否 --&gt; E[认定为内存泄漏&lt;br&gt;输出内存大小与申请调用栈]
+classDef important fill:#fff3e0,stroke:#ff9800,stroke-width:2px;
+</code></pre>
+
+<h4 id="源码路径"><a href="#源码路径" class="headerlink" title="源码路径"></a>源码路径</h4><table>
+<thead>
+<tr>
+<th>路径</th>
+<th>文件&#x2F;模块</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>asan_rtl.cpp</code></td>
+<td>运行时库入口（RunTime Library）</td>
+<td>初始化 ASan、设置 hook、启动检测等</td>
+</tr>
+<tr>
+<td><code>asan_interceptors.cpp</code></td>
+<td>标准函数拦截器</td>
+<td>重写 <code>memcpy</code>、<code>malloc</code>、<code>free</code> 等函数</td>
+</tr>
+<tr>
+<td><code>asan_report.cpp</code></td>
+<td>报告错误栈信息</td>
+<td>打印报错信息、栈追踪、源码位置等</td>
+</tr>
+<tr>
+<td><code>asan_mapping.h</code></td>
+<td>Shadow memory 映射逻辑</td>
+<td>1:8 映射关系，关键 shadow 计算</td>
+</tr>
+<tr>
+<td><code>asan_allocator.cpp</code></td>
+<td>自定义内存分配器</td>
+<td>包含红区、对齐等安全逻辑</td>
+</tr>
+<tr>
+<td><code>asan_poisoning.cpp</code></td>
+<td>中毒&#x2F;恢复接口</td>
+<td>调用 poison&#x2F;unpoison 改变内存状态</td>
+</tr>
+<tr>
+<td><code>asan_thread.cpp</code></td>
+<td>线程管理</td>
+<td>TLS、线程栈信息维护等</td>
+</tr>
+<tr>
+<td><code>llvm/lib/Transforms/Instrumentation/AddressSanitizer.cpp</code></td>
+<td>插桩入口</td>
+<td>插入对 <code>shadow memory</code> 的访问检查代码</td>
+</tr>
+</tbody></table>
+<h4 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h4><p>运行时库入口：</p>
+<pre><code class=" mermaid">graph TD
+  A[&quot;compiler-rt/lib/asan/asan_rtl.cpp/__asan_init()&quot;] --&gt; B[&quot;asan_activation.cpp/AsanActivate()激活Asan&quot;]
+  A --&gt; C[&quot;AsanInitFromRtl()&quot;]
+  C --&gt; D[&quot;AsanInitInternal()&quot;]
+  classDef important fill:#fff3e0,stroke:#ff9800,stroke-width:2px;
+</code></pre>
+
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">bool</span> <span class="hljs-title">AsanInitInternal</span><span class="hljs-params">()</span> </span>&#123;<br>    ……<br>    <span class="hljs-comment">// 设置内存毒化和分配上下文大小</span><br>    <span class="hljs-built_in">SetCanPoisonMemory</span>(<span class="hljs-built_in">flags</span>()-&gt;poison_heap);<br>  	<span class="hljs-built_in">SetMallocContextSize</span>(<span class="hljs-built_in">common_flags</span>()-&gt;malloc_context_size);<br>    ……<br>    <span class="hljs-comment">// 初始化拦截器</span><br>    <span class="hljs-built_in">InitializeAsanInterceptors</span>();<br>    ……<br>    <span class="hljs-comment">// 初始化影子内存</span><br>    <span class="hljs-built_in">InitializeShadowMemory</span>();<br>    ……<br>    <span class="hljs-comment">// 初始化分配器</span><br>    AllocatorOptions allocator_options;<br>  	allocator_options.<span class="hljs-built_in">SetFrom</span>(<span class="hljs-built_in">flags</span>(), <span class="hljs-built_in">common_flags</span>());<br>    <span class="hljs-built_in">InitializeAllocator</span>(allocator_options);<br>    ……<br>    <span class="hljs-comment">// 创建主线程，初始化反编辑器</span><br>    AsanThread *main_thread = <span class="hljs-built_in">CreateMainThread</span>();<br>  	<span class="hljs-built_in">CHECK_EQ</span>(<span class="hljs-number">0</span>, main_thread-&gt;<span class="hljs-built_in">tid</span>());<br>    force_interface_symbols();  <span class="hljs-comment">// no-op.</span><br>    <span class="hljs-built_in">SanitizerInitializeUnwinder</span>();<br>    ……<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><code>asan_mapping.h</code> 查看 shadow memory 的映射计算公式：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-meta">#<span class="hljs-keyword">define</span> ASAN_SHADOW_SCALE 3</span><br>……<br><span class="hljs-meta">#    <span class="hljs-keyword">define</span> MEM_TO_SHADOW(mem) \</span><br><span class="hljs-meta">      (((mem) &gt;&gt; ASAN_SHADOW_SCALE) + (ASAN_SHADOW_OFFSET))</span><br><span class="hljs-meta">#    <span class="hljs-keyword">define</span> SHADOW_TO_MEM(mem) \</span><br><span class="hljs-meta">      (((mem) - (ASAN_SHADOW_OFFSET)) &lt;&lt; (ASAN_SHADOW_SCALE))</span><br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="Valgrind工作机制"><a href="#Valgrind工作机制" class="headerlink" title="Valgrind工作机制"></a>Valgrind工作机制</h3><h4 id="工作原理-1"><a href="#工作原理-1" class="headerlink" title="工作原理"></a>工作原理</h4><p>Valgrind由内核（core）以及基于内核的其他调试工具组成。内核类似于一个框架（framework），它模拟了一个CPU环境，并提供服务给其他工具；而其他工具则类似于插件 (plug-in)，利用内核提供的服务完成各种特定的内存调试任务。最直观的表达就是：<code>Valgrind内核 + 工具插件 = Valgrind工具</code>。在Valgrind框架下编写一个二进制程序动态分析工具比从零开始简很多，因为Valgrind内核为新工具的编写提供了许多通用的工具集，比如错误记录、动态插桩等。</p>
+<p>当Valgrind工具程序启动时：</p>
+<ol>
+<li>将需要分析的程序加载与工具程序同一个进程空间中；</li>
+<li>使用<code>JIT（just-in-time）</code>的动态二进制重编译技术，将代码分成一个个小的代码块实施重编译；</li>
+<li>在重编译过程中，<strong>Valgrind内核会将相应代码块的机器码转化成中间表示</strong>，插件会在中间代码中进行相应分析代码的<strong>插桩</strong>，最后通过内核把中间表示转换成原本的机器码，在目标机器上执行；<strong>（源机器码 –&gt; 插桩 –&gt; 目标机器码）</strong></li>
+<li>Valgrind内核大部分时间花在上述机器码和中间表示的相互翻译执行中，<strong>而原程序的所有机器码并没有执行，执行的都是插桩后的代码</strong></li>
+</ol>
+<p>所有的Valgrind工具都是使用<strong>静态链接</strong>的可执行文件，里面包含了Valgrind内核和工具插件。虽然这样会导致每个工具程序中都需要包含一份Valgrind内核，内核大概2.5MB左右，稍微浪费一些磁盘空间，但是静态链接可以使整个可执行文件加载到非标准的启动地址，方便把待分析程序加载进同一个进程空间中，然后使用Valgrind重编译技术将待分析程序机器码重编译到别的地址执行。</p>
+<h5 id="核心框架"><a href="#核心框架" class="headerlink" title="核心框架"></a>核心框架</h5><p>Valgrind的体系结构如下图所示：</p>
+<p><img src="https://qnwang.oss-cn-hangzhou.aliyuncs.com/internship/20250509144807842.png" srcset="/blog/img/loading.gif" lazyload alt="img"></p>
+<h5 id="工具启动"><a href="#工具启动" class="headerlink" title="工具启动"></a>工具启动</h5><pre><code class=" mermaid">graph TD
+    A[命令行运行 valgrind --tool=&amp;lt;tool&amp;gt;] --&gt; B[valgrind 程序根据 tool 参数调用 execv]
+    B --&gt; C[加载对应的 Valgrind 工具插件]
+    C --&gt; D[Valgrind 内核初始化子系统&lt;br&gt;（地址空间管理器、内存分配器等）]
+    D --&gt; E[映射目标程序的 .text/.data 段&lt;br&gt;配置堆栈等]
+    E --&gt; F[初始化命令行参数&lt;br&gt;并加载工具插件]
+    F --&gt; G[加载更多子系统：&lt;br&gt;翻译表、信号处理、调度器、调试信息等]
+    G --&gt; H[准备完毕，开始执行目标程序第一条指令&lt;br&gt;进行 JIT 重编译（插桩）并运行]
+</code></pre>
+
+<h5 id="中间表示（VEX）"><a href="#中间表示（VEX）" class="headerlink" title="中间表示（VEX）"></a>中间表示（VEX）</h5><p>在Valgrind的重编译的过程中，使用的中间表示是一种平台无关的语言——VEX，通过屏蔽硬件平台的差异性，节省了大量针对不同平台的插桩代码。</p>
+<ul>
+<li><p>Statement（结构体<code>IRStmt</code>）表示有副作用的操作，如写寄存器、写内存、临时变量赋值等。其中，Statement由Expression组成。</p>
+</li>
+<li><p>Expression (结构体<code>IRExpr</code>) 表示没有副作用的操作，如读内存、做算术运算等，这些操作可以包含子表达式和表达式树。</p>
+</li>
+<li><p>在Valgrind中，代码被分解成多个小的代码块，每个代码块里包含VEX的Statement列表。每个代码块的结构体是<code>IRSB</code>，<code>IRSB</code>是单入口多出口的，代码如下所示：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-keyword">typedef</span><br>   <span class="hljs-keyword">struct</span> &#123;<br>      IRTypeEnv* tyenv; <span class="hljs-comment">// 表明IRSB中每个临时变量的类型</span><br>      IRStmt**   stmts; <span class="hljs-comment">// VEX语句列表</span><br>      Int        stmts_size; <span class="hljs-comment">// Statements总长度</span><br>      Int        stmts_used; <span class="hljs-comment">// 实际上使用的Statements的数目</span><br>      IRExpr*    next; <span class="hljs-comment">// 下一跳的位置</span><br>      IRJumpKind jumpkind; <span class="hljs-comment">// 最后代码块结束jump的类型</span><br>      Int        offsIP; <span class="hljs-comment">// IP寄存器的偏移</span><br>   &#125;<br>   IRSB;<br></code></pre></td></tr></table></figure>
+</li>
+<li><p>Valgrind根据一定规则将代码划分为很多小代码块后，会进行以下八个阶段，将插件的分析代码进行插桩并优化：</p>
+<pre><code class=" mermaid">graph TD
+    A[反汇编：机器码] --&gt; B[树状中间表示]
+    B --&gt; C[扁平中间表示]
+    C --&gt; D[带桩的扁平中间表示]:::important
+    D --&gt; E[优化的扁平中间表示]
+    E --&gt; F[汇编：带桩的树状中间表示]:::important
+    F --&gt; G[目标汇编代码]
+    G --&gt; H[寄存器优化的目标汇编代码]
+    H --&gt; I[机器码]
+ classDef important fill:#fff3e0,stroke:#ff9800,stroke-width:2px;
+</code></pre>
+</li>
+<li><p>JIT执行：</p>
+<pre><code class=" mermaid">flowchart TD
+    A[插桩后的机器码生成] --&gt; B[保存到固定大小的哈希表&lt;br&gt;（线性探测，80%阈值）]:::important
+    B --&gt; C&#123;哈希表是否达到80%容量？&#125;
+    C -- 是 --&gt; D[FIFO策略&lt;br&gt;丢弃1/8最旧的代码块]
+    C -- 否 --&gt; E[继续执行]
+    E --&gt; F[代码块执行完毕]
+    D --&gt; F
+    F --&gt; G[进入dispatcher（汇编实现）]
+    G --&gt; H&#123;dispatcher快速缓存命中？&#125;
+    H -- 是 --&gt; I[切换到下一个代码块（快速跳转）]
+    H -- 否 --&gt; J[进入scheduler（C实现）]
+    J --&gt; K&#123;哈希表中存在目标代码块？&#125;
+    K -- 是 --&gt; L[更新dispatcher缓存&lt;br&gt;并跳转]
+    K -- 否 --&gt; M[重新插桩编译&lt;br&gt;加入哈希表并更新dispatcher缓存]
+    M --&gt; L
+ classDef important fill:#fff3e0,stroke:#ff9800,stroke-width:2px;
+</code></pre></li>
+</ul>
+<h5 id="Memcheck-检测原理"><a href="#Memcheck-检测原理" class="headerlink" title="Memcheck 检测原理"></a>Memcheck 检测原理</h5><p><strong>Memcheck</strong>检测内存问题的原理如下图所示：</p>
+<p><img src="https://qnwang.oss-cn-hangzhou.aliyuncs.com/internship/20250509150159067.jpeg" srcset="/blog/img/loading.gif" lazyload alt="内存检查原理"></p>
+<p>Memcheck 能够检测出内存问题，关键在于其建立了两个全局表。</p>
+<ul>
+<li>Valid-Value 表：对于进程的整个地址空间中的每一个字节(byte)，都有与之对应的 8 个 bits；对于 CPU 的每个寄存器，也有一个与之对应的 bit 向量。这些 bits 负责记录该字节或者寄存器值是否具有有效的、已初始化的值。</li>
+<li>Valid-Address 表：对于进程整个地址空间中的每一个字节(byte)，还有与之对应的 1 个 bit，负责记录该地址是否能够被读写。</li>
+</ul>
+<p><img src="https://qnwang.oss-cn-hangzhou.aliyuncs.com/internship/20250509171919962.png" srcset="/blog/img/loading.gif" lazyload alt="memcheck影子内存"></p>
+<p><strong>检测原理</strong>：</p>
+<ul>
+<li>当要读写内存中某个字节时，首先检查这个字节对应的 A bit。如果该A bit显示该位置是无效位置，memcheck 则报告读写错误。</li>
+<li>内核（core）类似于一个虚拟的 CPU 环境，这样当内存中的某个字节被加载到真实的 CPU 中时，该字节对应的 V bit 也被加载到虚拟的 CPU 环境中。一旦寄存器中的值，被用来产生内存地址，或者该值能够影响程序输出，则 memcheck 会检查对应的V bits，如果该值尚未初始化，则会报告使用未初始化内存错误。</li>
+</ul>
+<h5 id="Valgrind回调Memcheck"><a href="#Valgrind回调Memcheck" class="headerlink" title="Valgrind回调Memcheck"></a>Valgrind回调Memcheck</h5><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">mc_pre_clo_init</span><span class="hljs-params">( <span class="hljs-type">void</span> )</span></span>;<br><span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">mc_post_clo_init</span> <span class="hljs-params">( <span class="hljs-type">void</span> )</span></span>;<br><span class="hljs-function">IRSB* <span class="hljs-title">MC_</span><span class="hljs-params">(instrument)</span> <span class="hljs-params">( VgCallbackClosure* closure,</span></span><br><span class="hljs-params"><span class="hljs-function">                        IRSB* sb_in,</span></span><br><span class="hljs-params"><span class="hljs-function">                        <span class="hljs-type">const</span> VexGuestLayout* layout,</span></span><br><span class="hljs-params"><span class="hljs-function">                        <span class="hljs-type">const</span> VexGuestExtents* vge,</span></span><br><span class="hljs-params"><span class="hljs-function">                        <span class="hljs-type">const</span> VexArchInfo* archinfo_host,</span></span><br><span class="hljs-params"><span class="hljs-function">                        IRType gWordTy, IRType hWordTy )</span></span>;<br><span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">mc_fini</span> <span class="hljs-params">( Int exitcode )</span></span>;<br></code></pre></td></tr></table></figure>
+
+<p>上述四个接口，由Valgrind在不同阶段调用。其中，<code>mc_pre_clo_init</code> 和 <code>mc_post_clo_init</code>用于初始化memcheck插件，<code>MC_(instrument)</code> 是在scheduler需要translate的插桩阶段会调用。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs c++">   <span class="hljs-built_in">VG_</span>(track_new_mem_startup)     ( mc_new_mem_startup );<br>   <span class="hljs-built_in">VG_</span>(track_new_mem_mmap)        ( mc_new_mem_mmap );<br>   <span class="hljs-built_in">VG_</span>(track_change_mem_mprotect) ( mc_new_mem_mprotect );<br>   <span class="hljs-built_in">VG_</span>(track_copy_mem_remap)      ( <span class="hljs-built_in">MC_</span>(copy_address_range_state) );<br>   <span class="hljs-built_in">VG_</span>(track_die_mem_stack_signal)( <span class="hljs-built_in">MC_</span>(make_mem_noaccess) );<br>   <span class="hljs-built_in">VG_</span>(track_die_mem_brk)         ( <span class="hljs-built_in">MC_</span>(make_mem_noaccess) );<br>   <span class="hljs-built_in">VG_</span>(track_die_mem_munmap)      ( <span class="hljs-built_in">MC_</span>(make_mem_noaccess) );<br>...<br>   <span class="hljs-built_in">VG_</span>(track_die_mem_stack)       ( mc_die_mem_stack     );<br>   <span class="hljs-built_in">VG_</span>(track_ban_mem_stack)       ( <span class="hljs-built_in">MC_</span>(make_mem_noaccess) );<br>   <span class="hljs-built_in">VG_</span>(track_pre_mem_read)        ( check_mem_is_defined );<br>   <span class="hljs-built_in">VG_</span>(track_pre_mem_read_asciiz) ( check_mem_is_defined_asciiz );<br>   <span class="hljs-built_in">VG_</span>(track_pre_mem_write)       ( check_mem_is_addressable );<br>   <span class="hljs-built_in">VG_</span>(track_post_mem_write)      ( mc_post_mem_write );<br>   <span class="hljs-built_in">VG_</span>(track_post_reg_write)                  ( mc_post_reg_write );<br>   <span class="hljs-built_in">VG_</span>(track_post_reg_write_clientcall_return)( mc_post_reg_write_clientcall );<br></code></pre></td></tr></table></figure>
+
+<p>上述这些 <code>VG_(track_*)</code> 函数是用于向Valgrind内核注册相应的事件监控，这些事件难以通过插桩来拦截的，如堆块的分配、堆栈指针的修改、信号处理等。当注册的事件发生时，Valgrind内核会调用Memcheck注册的函数。</p>
+<h4 id="工具包"><a href="#工具包" class="headerlink" title="工具包"></a>工具包</h4><h5 id="Memcheck※"><a href="#Memcheck※" class="headerlink" title="Memcheck※"></a>Memcheck※</h5><p>Memcheck检测内存管理问题，主要针对C和C++程序。当一个程序在Memcheck的监督下运行时，所有对内存的读取和写入都会被检查，并拦截对malloc&#x2F;new&#x2F;free&#x2F;delete的调用。因此，Memcheck可以检测您的程序是否：</p>
+<ul>
+<li>访问不应该访问的内存（尚未分配的区域、已释放的区域、超过堆块末尾的区域、堆栈中不可访问的区域）。</li>
+<li>以危险的方式使用未初始化的值。</li>
+<li>内存泄漏。</li>
+<li>对堆块执行错误的释放（双重释放、不匹配的释放）。</li>
+<li>将重叠的源内存块和目标内存块传递给memcpy()和相关函数。</li>
+</ul>
+<p>Memcheck会在这些错误发生时立即报告，给出发生错误的源行号，以及为到达该行而调用的函数的堆栈跟踪。Memcheck在字节级别跟踪可寻址性，在位级别跟踪值的初始化。因此，它可以检测单个未初始化位的使用，并且不会报告位字段操作中的虚假错误。Memcheck运行的程序比正常速度慢10-30倍。</p>
+<h5 id="Cachegrind"><a href="#Cachegrind" class="headerlink" title="Cachegrind"></a>Cachegrind</h5><p>Cachegrind是一个缓存探查器。它对CPU中的I1、D1和L2缓存执行详细的模拟，因此可以准确地确定代码中缓存未命中的来源。它通过每个函数、每个模块和整个程序摘要来识别每行源代码的缓存未命中、内存引用和执行的指令的数量。它适用于用任何语言编写的程序。Cachegrind运行的程序比正常速度慢20-100倍。</p>
+<h5 id="Callgrind"><a href="#Callgrind" class="headerlink" title="Callgrind"></a>Callgrind</h5><p>Josef Weidendorfer的Callgrind是对Cachegrind的扩展。它提供了Cachegrind所做的所有信息，以及关于调用图的额外信息。它在3.2.0版本中被集成到Valgrind的主版本中。单独提供的是一个令人惊叹的可视化工具<a target="_blank" rel="noopener" href="https://kcachegrind.sourceforge.net/html/Home.html">KCachegrind</a>，它可以更好地概述Callgrind收集的数据；它还可以用于可视化Cachegrind的输出。</p>
+<h5 id="Massif"><a href="#Massif" class="headerlink" title="Massif"></a>Massif</h5><p>Massif是一个堆探查器。它通过获取程序堆的定期快照来执行详细的堆评测。它生成一个图表，显示堆使用情况随时间的变化，包括程序中哪些部分负责最多内存分配的信息。该图由一个文本或HTML文件补充，该文件包括更多信息，用于确定在哪里分配了最多的内存。Massif运行程序的速度比正常速度慢20倍。</p>
+<h5 id="Helgrind"><a href="#Helgrind" class="headerlink" title="Helgrind"></a>Helgrind</h5><p>Helgrind是一个线程调试器，用于在多线程程序中查找数据竞赛。它查找由多个（POSIX p-）线程访问的内存位置，但找不到一致使用的（pthread_mutex_）锁。这样的位置指示线程之间缺少同步，并且可能导致难以找到与定时相关的问题。它对任何使用pthreads的程序都很有用。这是一个有点实验性的工具，所以这里特别欢迎您的反馈。</p>
+<h5 id="DRD"><a href="#DRD" class="headerlink" title="DRD"></a>DRD</h5><p>DRD是一种用于检测多线程C和C++程序中错误的工具。该工具适用于任何使用POSIX线程原语或使用在POSIX线程基元之上构建的线程概念的程序。虽然Helgrind可以检测到违反锁定顺序的情况，但对于大多数程序来说，DRD执行其分析所需的内存较少。</p>
+<h5 id="Lackey，Nulgrind"><a href="#Lackey，Nulgrind" class="headerlink" title="Lackey，Nulgrind"></a>Lackey，Nulgrind</h5><p>Lackey和Nulgrind也包括在Valgrind分布中。它们做的不多，只是为了测试和演示。</p>
+<h5 id="DHAT"><a href="#DHAT" class="headerlink" title="DHAT"></a>DHAT</h5><p>DHAT是一个用于检查程序如何使用堆分配的工具。它跟踪分配的块，并检查每次内存访问，以找到要访问的块（如果有的话）。它还附带了一个GUI，以便于探索配置文件结果</p>
+<h4 id="源码路径-1"><a href="#源码路径-1" class="headerlink" title="源码路径"></a>源码路径</h4><table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>入口源码</th>
+<th>阅读重点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1️⃣ 启动流程</td>
+<td><code>coregrind/m_main.c</code> 中的 <code>main()</code> 函数</td>
+<td>Valgrind 启动逻辑、注册工具、加载用户程序</td>
+</tr>
+<tr>
+<td>2️⃣ 工具注册</td>
+<td><code>memcheck/mc_main.c</code> 中的 <code>mc_pre_clo_init()</code></td>
+<td>Memcheck 是如何作为插件注册并接管分析任务的</td>
+</tr>
+<tr>
+<td>3️⃣ 插桩入口</td>
+<td><code>memcheck/mc_translate.c</code> 中的 <code>MC_(instrument)</code></td>
+<td>如何在 VEX IR 上插入 shadow memory 逻辑来检测读写</td>
+</tr>
+<tr>
+<td>4️⃣ shadow memory 实现</td>
+<td><code>memcheck/mc_machine.c</code>、<code>mc_memory.c</code></td>
+<td>如何为用户空间内存建立 shadow 映射<br>如何检查是否初始化、是否重叠写入等</td>
+</tr>
+<tr>
+<td>5️⃣ 报错逻辑</td>
+<td><code>memcheck/mc_errors.c</code></td>
+<td>各类内存错误的触发条件、错误消息打印函数</td>
+</tr>
+<tr>
+<td>6️⃣ VEX IR 转换（了解即可）</td>
+<td><code>VEX/pub/libvex.h</code>、<code>coregrind/m_translate.c</code></td>
+<td>了解如何将指令翻译成 IR 并应用插件逻辑</td>
+</tr>
+</tbody></table>
+<h4 id="源码分析-1"><a href="#源码分析-1" class="headerlink" title="源码分析"></a>源码分析</h4><h5 id="启动流程"><a href="#启动流程" class="headerlink" title="启动流程"></a>启动流程</h5><pre><code class=" mermaid">graph TD
+  A[&quot;coregrind/m_main.c/valgrind_main()&quot;] --&gt; B[&quot;启动调试信息&quot;]
+  A --&gt; C[&quot;启动地址空间管理器&quot;]
+  A --&gt; D[&quot;启动动态内存管理器&quot;]
+  B --&gt; E[&quot;识别cpu类型&quot;]
+  C --&gt; E
+  D --&gt; E
+  E --&gt; F[&quot;识别工具类型&quot;]
+  F --&gt; G[&quot;设置默认的 vex 控制参数&quot;]
+  G --&gt; H[&quot;初始化工具tl_pre_clo_init()/tool_post_clo_init()&quot;]:::important
+  H --&gt; J[&quot;初始化调度器&quot;]
+  J --&gt; K[&quot;设置一些堆栈状态，运行&quot;]
+ classDef important fill:#fff3e0,stroke:#ff9800,stroke-width:2px;
+</code></pre>
+
+<h5 id="工具注册（以memcheck为例）"><a href="#工具注册（以memcheck为例）" class="headerlink" title="工具注册（以memcheck为例）"></a>工具注册（以memcheck为例）</h5><pre><code class=" mermaid">graph TD
+  A[&quot;memcheck/mc_main.c/mc_pre_clo_init()&quot;] --&gt; B[&quot;VG_(basic_tool_funcs)&quot;]
+  B --&gt; C[&quot;插桩入口MC_(instrument)&quot;]:::important
+  A --&gt; D[&quot;VG_(needs_tool_errors)&quot;]
+  D --&gt; E[&quot;报错逻辑入口MC_(eq_Error)&quot;]
+  A --&gt; F[&quot;初始化shadow映射init_shadow_memory()&quot;]
+  classDef important fill:#fff3e0,stroke:#ff9800,stroke-width:2px;
+</code></pre>
+
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-comment">// mermaid --启动调试信息</span><br><span class="hljs-comment">// memcheck/mc_main.c</span><br><span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">mc_pre_clo_init</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span></span><br><span class="hljs-function"></span>&#123;<br>   ……<br>   <span class="hljs-comment">// 注册工具，插桩入口</span><br>   <span class="hljs-built_in">VG_</span>(basic_tool_funcs)          (mc_post_clo_init,<br>                                   <span class="hljs-built_in">MC_</span>(instrument),<br>                                   mc_fini);<br>   ……<br>   <span class="hljs-comment">// 报错逻辑入口</span><br>   <span class="hljs-built_in">VG_</span>(needs_tool_errors)         (<span class="hljs-built_in">MC_</span>(eq_Error),<br>                                   <span class="hljs-built_in">MC_</span>(before_pp_Error),<br>                                   <span class="hljs-built_in">MC_</span>(pp_Error),<br>                                   True,<span class="hljs-comment">/*show TIDs for errors*/</span><br>                                   <span class="hljs-built_in">MC_</span>(update_Error_extra),<br>                                   <span class="hljs-built_in">MC_</span>(is_recognised_suppression),<br>                                   <span class="hljs-built_in">MC_</span>(read_extra_suppression_info),<br>                                   <span class="hljs-built_in">MC_</span>(error_matches_suppression),<br>                                   <span class="hljs-built_in">MC_</span>(get_error_name),<br>                                   <span class="hljs-built_in">MC_</span>(get_extra_suppression_info),<br>                                   <span class="hljs-built_in">MC_</span>(print_extra_suppression_use),<br>                                   <span class="hljs-built_in">MC_</span>(update_extra_suppression_use));<br>   ……<br>   <span class="hljs-comment">// shadow映射</span><br>   <span class="hljs-built_in">init_shadow_memory</span>();<br>   ……<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="实现的不同之处"><a href="#实现的不同之处" class="headerlink" title="实现的不同之处"></a>实现的不同之处</h3><table>
+<thead>
+<tr>
+<th></th>
+<th>AddressSanitizer (ASan)</th>
+<th>Valgrind</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>实现方式</td>
+<td>编译期插桩（基于 Clang&#x2F;LLVM 插入检查代码）</td>
+<td>动态二进制插桩（运行时在二进制层面插桩）</td>
+</tr>
+<tr>
+<td>插桩时机</td>
+<td>编译时</td>
+<td>运行时</td>
+</tr>
+<tr>
+<td>插桩方式</td>
+<td>修改 LLVM IR，插入 shadow memory 检查逻辑</td>
+<td>使用 JIT 模拟器重写程序指令</td>
+</tr>
+<tr>
+<td>内存状态追踪</td>
+<td>使用 Shadow Memory，通常 1:8 映射</td>
+<td>通过完整模拟 CPU 访问并维护虚拟内存状态</td>
+</tr>
+<tr>
+<td>运行时依赖</td>
+<td>编译后程序链接 runtime 库（compiler-rt）</td>
+<td>不修改原程序，Valgrind 作为宿主启动目标程序</td>
+</tr>
+<tr>
+<td>性能开销</td>
+<td>较低（~2x）</td>
+<td>较高（10x-50x）</td>
+</tr>
+<tr>
+<td>可移植性</td>
+<td>与编译器强绑定（Clang）</td>
+<td>与平台强绑定（对 x86&#x2F;x86_64 支持好）</td>
+</tr>
+<tr>
+<td>检测能力</td>
+<td>精度高但主要针对 Heap&#x2F;Stack&#x2F;Global 的越界&#x2F;Use-After-Free</td>
+<td>检测更全面，包含内存泄漏、未初始化变量、未定义行为等</td>
+</tr>
+<tr>
+<td>可扩展性</td>
+<td>可通过编译器 Pass 扩展</td>
+<td>可通过开发工具插件（如 Helgrind, DRD）扩展</td>
+</tr>
+</tbody></table>
+<h2 id="三、安装与使用方式"><a href="#三、安装与使用方式" class="headerlink" title="三、安装与使用方式"></a>三、安装与使用方式</h2><h3 id="ASan-使用"><a href="#ASan-使用" class="headerlink" title="ASan 使用"></a>ASan 使用</h3><h4 id="安装Asan"><a href="#安装Asan" class="headerlink" title="安装Asan"></a>安装Asan</h4><p>在 Ubuntu 上，<strong>ASan (AddressSanitizer)</strong> <strong>不需要单独安装</strong>，因为它是 <strong>GCC</strong> 或 <strong>Clang</strong> 编译器自带的功能模块。你只需要确保你的 <strong>GCC</strong> 或 <strong>Clang</strong> 版本支持 ASan（一般 Ubuntu 18.04+ 默认都支持）。</p>
+<h4 id="使用Asan"><a href="#使用Asan" class="headerlink" title="使用Asan"></a>使用Asan</h4><ol>
+<li><p>使用要求：编译时加上 <code>-fsanitize=address -g</code>（<code>-fsanitize=address</code>：启用 AddressSanitizer，<code>-g</code>：生成调试符号，方便错误定位到具体源码行号）</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># eg</span><br>g++ -fsanitize=address -g your_code.cpp -o your_program<br><span class="hljs-comment"># -fno-omit-frame-pointer 让栈追溯信息更加友好</span><br></code></pre></td></tr></table></figure>
+</li>
+<li><p>编译后直接运行，出现非法内存访问、溢出、use-after-free 等时，ASan 会自动终止程序并输出详细错误栈信息。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">./your_program<br></code></pre></td></tr></table></figure>
+</li>
+<li><p>进阶配置：可以通过环境变量控制 ASan 行为：</p>
+<ul>
+<li><p>显示更多详细信息：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">export</span> ASAN_OPTIONS=verbosity=1<br></code></pre></td></tr></table></figure>
+</li>
+<li><p>打印出泄漏检测（需要加 <code>-fsanitize=leak</code>）：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">export</span> ASAN_OPTIONS=detect_leaks=1<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># eg：</span><br><span class="hljs-built_in">export</span> ASAN_OPTIONS=detect_leaks=1:abort_on_error=1<br>./your_program<br></code></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th><strong>flag</strong></th>
+<th><strong>含义</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>halt_on_error</td>
+<td>默认为1，ASan检测到错误后会中止程序设为0后，ASan检测到错误后不会中止程序</td>
+</tr>
+<tr>
+<td>log_path</td>
+<td>设置错误信息的输出路径</td>
+</tr>
+<tr>
+<td>detect_stack_use_after_return</td>
+<td>是否检测use after return错误默认为0，即关闭该检测功能</td>
+</tr>
+<tr>
+<td>help&#x3D;1</td>
+<td>输出所有支持的参数</td>
+</tr>
+</tbody></table>
+</li>
+</ul>
+</li>
+</ol>
+<ul>
+<li>编译加上 <code>-fsanitize=address -g</code></li>
+</ul>
+<p>更多ASAN_OPTIONS可以参考：<a target="_blank" rel="noopener" href="https://github.com/google/sanitizers/wiki/AddressSanitizerFlags">https://github.com/google/sanitizers/wiki/AddressSanitizerFlags</a></p>
+<h3 id="Valgrind-使用"><a href="#Valgrind-使用" class="headerlink" title="Valgrind 使用"></a>Valgrind 使用</h3><h4 id="安装-Valgrind"><a href="#安装-Valgrind" class="headerlink" title="安装 Valgrind"></a>安装 Valgrind</h4><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sh"><span class="hljs-built_in">sudo</span> apt install valgrind <br></code></pre></td></tr></table></figure>
+
+<p><img src="https://qnwang.oss-cn-hangzhou.aliyuncs.com/internship/20250426221902305.png" srcset="/blog/img/loading.gif" lazyload alt="image-20250426221902277"></p>
+<h4 id="使用valgrind"><a href="#使用valgrind" class="headerlink" title="使用valgrind"></a>使用valgrind</h4><ol>
+<li>使用要求：编译程序时使用调试信息选项 -g（使用编译程序以-g包含调试信息，以便 Memcheck 的错误消息包含准确的行号。-O0如果您可以忍受速度变慢，使用也是一个好主意。 -O1错误消息中的行号可能不准确，但通常情况下，在编译的代码上运行 Memcheck-O1效果很好，而且与直接运行相比，速度提升-O0非常显著。 -O2不建议使用及以上版本，因为 Memcheck 偶尔会报告实际上并不存在未初始化值的错误）。</li>
+<li>使用方法：使用 valgrind 运行程序：valgrind –leak-check&#x3D;full .&#x2F;your_program</li>
+<li>常用选项：<ul>
+<li>–leak-check&#x3D;full：启用详细的内存泄漏检测。</li>
+<li>–track-origins&#x3D;yes：在内存未初始化时，报告其来源。</li>
+<li>–log-file&#x3D;filename：将 Valgrind 的输出写入文件 filename</li>
+</ul>
+</li>
+</ol>
+<h2 id="四、检测能力比较"><a href="#四、检测能力比较" class="headerlink" title="四、检测能力比较"></a>四、检测能力比较</h2><table>
+<thead>
+<tr>
+<th>比较项</th>
+<th>ASan</th>
+<th>Valgrind</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>检测内存越界</td>
+<td>✅ 高效准确</td>
+<td>✅ 高效准确</td>
+</tr>
+<tr>
+<td>检测内存泄漏</td>
+<td>✅（可选配 LeakSanitizer）</td>
+<td>✅（默认内置）</td>
+</tr>
+<tr>
+<td>检测未初始化读</td>
+<td>❌（需要另加 MSan）</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>检测堆栈溢出</td>
+<td>✅（有限支持）</td>
+<td>✅（通过 Memcheck 支持）</td>
+</tr>
+<tr>
+<td>检测速度</td>
+<td>🔥 极快（通常 2x-3x 原程序速度）</td>
+<td>🐢 较慢（通常 10x-50x 原程序速度）</td>
+</tr>
+<tr>
+<td>支持大程序</td>
+<td>✅ 支持大内存程序</td>
+<td>❌ 容易内存爆掉</td>
+</tr>
+<tr>
+<td>平台支持</td>
+<td>Linux、macOS、Windows (部分)</td>
+<td>Linux、macOS（Windows 支持差）</td>
+</tr>
+</tbody></table>
+<h2 id="五、输出示例与解读"><a href="#五、输出示例与解读" class="headerlink" title="五、输出示例与解读"></a>五、输出示例与解读</h2><h3 id="ASan-错误输出示例"><a href="#ASan-错误输出示例" class="headerlink" title="ASan 错误输出示例"></a>ASan 错误输出示例</h3><h4 id="验证代码"><a href="#验证代码" class="headerlink" title="验证代码"></a>验证代码</h4><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-type">int</span> argc, <span class="hljs-type">char</span> **argv)</span> </span>&#123;<br>  <span class="hljs-type">int</span> *array = <span class="hljs-keyword">new</span> <span class="hljs-type">int</span>[<span class="hljs-number">100</span>];<br>  <span class="hljs-keyword">delete</span> [] array;<br>  <span class="hljs-keyword">return</span> array[argc];  <span class="hljs-comment">// BOOM</span><br>&#125;<br><span class="hljs-comment">// RUN: clang -O -g -fsanitize=address %t &amp;&amp; ./a.out</span><br></code></pre></td></tr></table></figure>
+
+<h4 id="验证结果"><a href="#验证结果" class="headerlink" title="验证结果"></a>验证结果</h4><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><code class="hljs c++">=================================================================<br>==<span class="hljs-number">6254</span>== ERROR: AddressSanitizer: heap-use-after-free on address <span class="hljs-number">0x603e0001fc64</span> at pc <span class="hljs-number">0x417f6a</span> bp <span class="hljs-number">0x7fff626b3250</span> sp <span class="hljs-number">0x7fff626b3248</span><br>READ of size <span class="hljs-number">4</span> at <span class="hljs-number">0x603e0001fc64</span> thread T0<br>    #<span class="hljs-number">0</span> <span class="hljs-number">0x417f69</span> in main example_UseAfterFree.cc:<span class="hljs-number">5</span><br>    #<span class="hljs-number">1</span> <span class="hljs-number">0x7fae62b5076c</span> (/lib/x86_64-linux-gnu/libc.so<span class="hljs-number">.6</span><span class="hljs-number">+0x2176c</span>)<br>    #<span class="hljs-number">2</span> <span class="hljs-number">0x417e54</span> (a.out<span class="hljs-number">+0x417e54</span>)<br><span class="hljs-number">0x603e0001fc64</span> is located <span class="hljs-number">4</span> bytes inside of <span class="hljs-number">400</span>-byte region [<span class="hljs-number">0x603e0001fc60</span>,<span class="hljs-number">0x603e0001fdf0</span>)<br>freed by thread T0 here:<br>    #<span class="hljs-number">0</span> <span class="hljs-number">0x40d4d2</span> in <span class="hljs-keyword">operator</span> <span class="hljs-keyword">delete</span>[](<span class="hljs-type">void</span>*) /home/kcc/llvm/projects/compiler-rt/lib/asan/asan_new_delete.cc:<span class="hljs-number">61</span><br>    #<span class="hljs-number">1</span> <span class="hljs-number">0x417f2e</span> in main example_UseAfterFree.cc:<span class="hljs-number">4</span><br>previously allocated by thread T0 here:<br>    #<span class="hljs-number">0</span> <span class="hljs-number">0x40d312</span> in <span class="hljs-keyword">operator</span> <span class="hljs-keyword">new</span>[](<span class="hljs-type">unsigned</span> <span class="hljs-type">long</span>) /home/kcc/llvm/projects/compiler-rt/lib/asan/asan_new_delete.cc:<span class="hljs-number">46</span><br>    #<span class="hljs-number">1</span> <span class="hljs-number">0x417f1e</span> in main example_UseAfterFree.cc:<span class="hljs-number">3</span><br>Shadow bytes around the buggy address:<br>  <span class="hljs-number">0x1c07c0003f30</span>: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa<br>  <span class="hljs-number">0x1c07c0003f40</span>: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa<br>  <span class="hljs-number">0x1c07c0003f50</span>: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa<br>  <span class="hljs-number">0x1c07c0003f60</span>: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa<br>  <span class="hljs-number">0x1c07c0003f70</span>: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa<br>=&gt;<span class="hljs-number">0x1c07c0003f80</span>: fa fa fa fa fa fa fa fa fa fa fa fa[fd]fd fd fd<br>  <span class="hljs-number">0x1c07c0003f90</span>: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd<br>  <span class="hljs-number">0x1c07c0003fa0</span>: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd<br>  <span class="hljs-number">0x1c07c0003fb0</span>: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fa fa<br>  <span class="hljs-number">0x1c07c0003fc0</span>: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa<br>  <span class="hljs-number">0x1c07c0003fd0</span>: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa<br>Shadow byte <span class="hljs-built_in">legend</span> (one shadow byte represents <span class="hljs-number">8</span> application bytes):<br>  Addressable:           <span class="hljs-number">00</span><br>  Partially addressable: <span class="hljs-number">01</span> <span class="hljs-number">02</span> <span class="hljs-number">03</span> <span class="hljs-number">04</span> <span class="hljs-number">05</span> <span class="hljs-number">06</span> <span class="hljs-number">07</span> <br>  Heap left redzone:     fa<br>  Heap righ redzone:     fb<br>  Freed Heap region:     fd<br>  Stack left redzone:    f1<br>  Stack mid redzone:     f2<br>  Stack right redzone:   f3<br>  Stack partial redzone: f4<br>  Stack after <span class="hljs-keyword">return</span>:    f5<br>  Stack use after scope: f8<br>  Global redzone:        f9<br>  Global init order:     f6<br>  Poisoned by user:      f7<br>  ASan internal:         fe<br>==<span class="hljs-number">6254</span>== ABORTING<br></code></pre></td></tr></table></figure>
+
+<h4 id="结果分析"><a href="#结果分析" class="headerlink" title="结果分析"></a>结果分析</h4><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><code class="hljs sh">1. 错误类型摘要<br>    <span class="hljs-comment"># ASan 检测到错误类型是 heap-use-after-free，表示访问了已经释放的堆内存。</span><br>    ==6254== ERROR: AddressSanitizer: heap-use-after-free on address 0x603e0001fc64<br><br>2. 出错位置<br>    <span class="hljs-comment"># 错误发生在 example_UseAfterFree.cc 文件的第5行 main 函数中。</span><br>    <span class="hljs-comment"># 出错时正在读取（READ）4字节的数据。</span><br>    READ of size 4 at 0x603e0001fc64 thread T0<br>      <span class="hljs-comment">#0 0x417f69 in main example_UseAfterFree.cc:5</span><br>      <span class="hljs-comment">#1 0x7fae62b5076c (/lib/x86_64-linux-gnu/libc.so.6+0x2176c)</span><br>      <span class="hljs-comment">#2 0x417e54 (a.out+0x417e54)</span><br><br>3. 内存分配与释放信息<br>    <span class="hljs-comment"># 这块内存是在 example_UseAfterFree.cc 文件第3行通过 new[] 分配的。</span><br>    previously allocated by thread T0 here:<br>      <span class="hljs-comment">#0 0x40d312 in operator new[](unsigned long)</span><br>      <span class="hljs-comment">#1 0x417f1e in main example_UseAfterFree.cc:3</span><br><br>    <span class="hljs-comment"># 这块内存已经在第4行通过 delete[] 被释放。</span><br>    freed by thread T0 here:<br>      <span class="hljs-comment">#0 0x40d4d2 in operator delete[](void*)</span><br>      <span class="hljs-comment">#1 0x417f2e in main example_UseAfterFree.cc:4</span><br><br>4. Shadow Memory 状态<br>    <span class="hljs-comment"># 出错地址周围的 Shadow Memory 信息如下：</span><br>    Shadow bytes around the buggy address:<br>      0x1c07c0003f80: fa fa fa fa fa fa fa fa fa fa fa fa [fd]fd fd fd<br>    <span class="hljs-comment"># 其中 fd 表示 &quot;Freed Heap Region&quot;，即已经释放的堆内存。</span><br>    <span class="hljs-comment"># 说明正在访问一块已经释放的堆区域，因此发生了 heap-use-after-free 错误。</span><br><br>5. Shadow Byte Legend<br>    <span class="hljs-comment"># Shadow Byte 各个标记含义：</span><br>    - 00: 正常可访问内存<br>    - fd: 已释放的堆内存（Freed Heap region）<br>    - fa: 堆红区（Heap redzone，用于保护越界）<br></code></pre></td></tr></table></figure>
+
+<p>更多例子在：<a target="_blank" rel="noopener" href="https://github.com/google/sanitizers/wiki/addresssanitizer%E7%9A%84introduction%E9%83%A8%E5%88%86">https://github.com/google/sanitizers/wiki/addresssanitizer的introduction部分</a></p>
+<h3 id="Valgrind-输出示例"><a href="#Valgrind-输出示例" class="headerlink" title="Valgrind 输出示例"></a>Valgrind 输出示例</h3><h4 id="验证代码-1"><a href="#验证代码-1" class="headerlink" title="验证代码"></a>验证代码</h4><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">func</span><span class="hljs-params">()</span></span>&#123;<br>    <span class="hljs-type">int</span>* p = <span class="hljs-keyword">new</span> <span class="hljs-built_in">int</span>(<span class="hljs-number">10</span>); <span class="hljs-comment">// 只申请不回收，leak</span><br>&#125;<br><span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span>&#123;<br><br>    <span class="hljs-built_in">func</span>();<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br><span class="hljs-comment">// sh命令</span><br>g++ test.cpp -g<br>valgrind --leak-check=full ./a.out<br></code></pre></td></tr></table></figure>
+
+<h4 id="验证结果-1"><a href="#验证结果-1" class="headerlink" title="验证结果"></a>验证结果</h4><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs sh">[root:~/stutest]# valgrind --leak-check=full ./a.out <br>==1536437== Memcheck, a memory error detector<br>==1536437== Copyright (C) 2002-2017, and GNU GPL<span class="hljs-string">&#x27;d, by Julian Seward et al.</span><br><span class="hljs-string">==1536437== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info</span><br><span class="hljs-string">==1536437== Command: ./a.out</span><br><span class="hljs-string">==1536437== </span><br><span class="hljs-string">==1536437== </span><br><span class="hljs-string">==1536437== HEAP SUMMARY: # 堆摘要</span><br><span class="hljs-string">==1536437==     in use at exit: 4 bytes in 1 blocks</span><br><span class="hljs-string">==1536437==   total heap usage: 2 allocs, 1 frees, 72,708 bytes allocated</span><br><span class="hljs-string">==1536437== </span><br><span class="hljs-string">==1536437== 4 bytes in 1 blocks are definitely lost in loss record 1 of 1</span><br><span class="hljs-string">==1536437==    at 0x48657B8: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-arm64-linux.so)</span><br><span class="hljs-string">==1536437==    by 0x1088E3: func() (test.cpp:4)</span><br><span class="hljs-string">==1536437==    by 0x108907: main (test.cpp:9)</span><br><span class="hljs-string">==1536437== </span><br><span class="hljs-string">==1536437== LEAK SUMMARY: # 泄露摘要</span><br><span class="hljs-string">==1536437==    definitely lost: 4 bytes in 1 blocks</span><br><span class="hljs-string">==1536437==    indirectly lost: 0 bytes in 0 blocks</span><br><span class="hljs-string">==1536437==      possibly lost: 0 bytes in 0 blocks</span><br><span class="hljs-string">==1536437==    still reachable: 0 bytes in 0 blocks</span><br><span class="hljs-string">==1536437==         suppressed: 0 bytes in 0 blocks</span><br><span class="hljs-string">==1536437== </span><br><span class="hljs-string">==1536437== For lists of detected and suppressed errors, rerun with: -s</span><br><span class="hljs-string">==1536437== ERROR SUMMARY: 1 errors from 1 contexts (suppressed: 0 from 0)</span><br></code></pre></td></tr></table></figure>
+
+<h4 id="结果分析-1"><a href="#结果分析-1" class="headerlink" title="结果分析"></a>结果分析</h4><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs sh">1. 堆摘要：<br>	<span class="hljs-comment"># 在程序结束时，有 4 字节的内存仍然在使用，这意味着有一块 4 字节的内存没有被释放。</span><br>    <span class="hljs-keyword">in</span> use at <span class="hljs-built_in">exit</span>: 4 bytes <span class="hljs-keyword">in</span> 1 blocks<br>    <span class="hljs-comment"># 程序总共进行了 2 次内存分配操作（allocs），但是只进行了 1 次内存释放操作（frees），总共分配了 72,708 字节的内存。</span><br>    total heap usage: 2 allocs, 1 frees, 72,708 bytes allocated<br>2. 泄漏摘要<br>	<span class="hljs-comment"># Valgrind 确认有 4 字节内存泄漏，这次泄漏的详细信息如下：</span><br>	4 bytes <span class="hljs-keyword">in</span> 1 blocks are definitely lost <span class="hljs-keyword">in</span> loss record 1 of 1<br>	<span class="hljs-comment"># 内存是在调用 operator new 时分配的，这通常表示你使用了 new 操作符分配了内存。</span><br>	at 0x486578B: operator new(unsigned long) (<span class="hljs-keyword">in</span> /usr/libexec/valgrind/vgpreload_memcheck-arm64-linux.so)<br>	<span class="hljs-comment"># func() 函数中进行了内存分配，这是导致内存泄漏的地方。</span><br>	by 0x1088E3: func() (test.cpp:4)<br>	<span class="hljs-comment"># main 函数调用了 func()，导致了内存泄漏。</span><br>	by 0x108907: main (test.cpp:9)<br>3. 错误摘要<br>	<span class="hljs-comment"># 总共检测到 1 个内存泄漏错误，且没有任何错误被抑制。</span><br>    ERROR SUMMARY: 1 errors from 1 contexts (suppressed: 0 from 0)<br></code></pre></td></tr></table></figure>
+
+<h3 id="常见内存泄漏的场景"><a href="#常见内存泄漏的场景" class="headerlink" title="常见内存泄漏的场景"></a>常见内存泄漏的场景</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;cstring&gt;</span></span><br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">memoryLeak1</span><span class="hljs-params">()</span> </span>&#123;<br>    <span class="hljs-comment">// 简单的内存泄漏，没有释放分配的内存</span><br>    <span class="hljs-type">int</span>* leakyArray = <span class="hljs-keyword">new</span> <span class="hljs-type">int</span>[<span class="hljs-number">100</span>];<br>    <span class="hljs-comment">// 忘记释放 leakyArray</span><br>&#125;<br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">memoryLeak2</span><span class="hljs-params">()</span> </span>&#123;<br>    <span class="hljs-comment">// 动态分配的内存覆盖了原先分配的内存，导致原内存泄漏</span><br>    <span class="hljs-type">char</span>* leakyString = <span class="hljs-keyword">new</span> <span class="hljs-type">char</span>[<span class="hljs-number">25</span>];<br>    <span class="hljs-built_in">strcpy</span>(leakyString, <span class="hljs-string">&quot;Initial allocation&quot;</span>);<br>    <br>    <span class="hljs-comment">// 重新分配，原内存未释放</span><br>    leakyString = <span class="hljs-keyword">new</span> <span class="hljs-type">char</span>[<span class="hljs-number">50</span>];<br>    <span class="hljs-built_in">strcpy</span>(leakyString, <span class="hljs-string">&quot;Reallocation causes leak&quot;</span>);<br><br>    <span class="hljs-keyword">delete</span>[] leakyString; <span class="hljs-comment">// 释放第二次分配的内存</span><br>&#125;<br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">memoryLeak3</span><span class="hljs-params">()</span> </span>&#123;<br>    <span class="hljs-comment">// 部分内存泄漏，未释放结构体中的某些成员</span><br>    <span class="hljs-keyword">struct</span> <span class="hljs-title class_">Node</span> &#123;<br>        <span class="hljs-type">int</span>* value;<br>        Node* next;<br>    &#125;;<br><br>    Node* node = <span class="hljs-keyword">new</span> Node;<br>    node-&gt;value = <span class="hljs-keyword">new</span> <span class="hljs-built_in">int</span>(<span class="hljs-number">10</span>);<br>    node-&gt;next = <span class="hljs-literal">nullptr</span>;<br><br>    <span class="hljs-keyword">delete</span> node; <span class="hljs-comment">// 只释放了 node，没有释放 node-&gt;value</span><br>&#125;<br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">memoryLeak4</span><span class="hljs-params">()</span> </span>&#123;<br>    <span class="hljs-comment">// 使用未初始化的指针</span><br>    <span class="hljs-type">int</span>* uninitializedPtr;<br>    *uninitializedPtr = <span class="hljs-number">42</span>; <span class="hljs-comment">// 未定义行为</span><br>&#125;<br><br><span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>&#123;<br>    <span class="hljs-built_in">memoryLeak1</span>();<br>    <span class="hljs-built_in">memoryLeak2</span>();<br>    <span class="hljs-built_in">memoryLeak3</span>();<br>    <span class="hljs-built_in">memoryLeak4</span>();<br><br>    std::cout &lt;&lt; <span class="hljs-string">&quot;Done testing memory leaks!&quot;</span> &lt;&lt; std::endl;<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="六、常见问题与坑"><a href="#六、常见问题与坑" class="headerlink" title="六、常见问题与坑"></a>六、常见问题与坑</h2><h3 id="ASan-常见问题"><a href="#ASan-常见问题" class="headerlink" title="ASan 常见问题"></a><strong>ASan 常见问题</strong></h3><ul>
+<li>与某些库冲突（如 glibc 的 hook）</li>
+<li>需要匹配 libc 版本</li>
+<li>asan版本程序在Linux环境下运行时会额外申请20TB的虚拟内存，会增加大量的虚拟内存使用<ul>
+<li>需要确保&#x2F;proc&#x2F;sys&#x2F;vm&#x2F;overcommit_memory的值不为2</li>
+<li>这也可以作为检验ASan是否工作的标志</li>
+</ul>
+</li>
+<li>asan工具不是万能的，必须要跑到有问题的代码才可以暴露出来</li>
+</ul>
+<h3 id="Valgrind-常见问题"><a href="#Valgrind-常见问题" class="headerlink" title="Valgrind 常见问题"></a><strong>Valgrind 常见问题</strong></h3><ul>
+<li>运行特别慢</li>
+<li>不支持 AVX-512、SIMD 优化程序</li>
+<li>对于一些静态分配或在堆栈上分配的数组的超出范围的读取或写入，Valgrind 可能无法检测到</li>
+<li>在检测某些复杂的内存错误场景时，可能会出现误报或漏报的情况</li>
+</ul>
+<h2 id="七、实战应用场景建议"><a href="#七、实战应用场景建议" class="headerlink" title="七、实战应用场景建议"></a>七、实战应用场景建议</h2><h3 id="什么时候优先用-ASan？"><a href="#什么时候优先用-ASan？" class="headerlink" title="什么时候优先用 ASan？"></a>什么时候优先用 ASan？</h3><ul>
+<li>开发阶段，快速找到内存错误</li>
+<li>代码量很大的时候用Asan</li>
+</ul>
+<h3 id="什么时候优先用-Valgrind？"><a href="#什么时候优先用-Valgrind？" class="headerlink" title="什么时候优先用 Valgrind？"></a>什么时候优先用 Valgrind？</h3><ul>
+<li>找难以发现的泄漏和未初始化读问题，做深入分析</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>场景&#x2F;目标</th>
+<th>适用工具</th>
+<th>原因说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1. 内存越界访问检测</td>
+<td>✅ ASan &amp; ✅ Valgrind</td>
+<td>两者均可，但 ASan 检测更快且栈信息更清晰</td>
+</tr>
+<tr>
+<td>2. Use-After-Free 检测</td>
+<td>✅ ASan &amp; ✅ Valgrind</td>
+<td>都能检测，但 ASan 执行效率更高</td>
+</tr>
+<tr>
+<td>3. 内存泄漏检测</td>
+<td>✅ Valgrind（Memcheck）</td>
+<td>ASan 对泄漏检测不如 Valgrind 精细（除非搭配 LeakSanitizer）</td>
+</tr>
+<tr>
+<td>4. 未初始化内存使用检测</td>
+<td>✅ Valgrind</td>
+<td>ASan 无法检测未初始化使用，Valgrind 的 Undef-Value 检测更强</td>
+</tr>
+<tr>
+<td>5. 并发线程数据竞争检测</td>
+<td>🔶 DRD&#x2F;Helgrind（Valgrind 插件）</td>
+<td>ASan 无法检测数据竞争，需用 TSan；Valgrind 插件较弱</td>
+</tr>
+<tr>
+<td>6. 性能要求较高的场合</td>
+<td>✅ ASan</td>
+<td>Valgrind 开销大，ASan 更适合实战部署前测试</td>
+</tr>
+<tr>
+<td>7. 快速集成进 CI&#x2F;CD</td>
+<td>✅ ASan</td>
+<td>编译期工具更易于集成测试流程</td>
+</tr>
+<tr>
+<td>8. 无法重编译的三方库检测</td>
+<td>✅ Valgrind</td>
+<td>ASan 需重新编译，Valgrind 可直接运行已有二进制</td>
+</tr>
+<tr>
+<td>9. 动态分析研究&#x2F;教学</td>
+<td>✅ Valgrind</td>
+<td>更直观、可观测性强、控制粒度高</td>
+</tr>
+<tr>
+<td>10. 大型 C++ 项目（如游戏、系统工具）</td>
+<td>✅ ASan</td>
+<td>开销小，误报少，更适合持续集成测试</td>
+</tr>
+</tbody></table>
+<h2 id="八、总结"><a href="#八、总结" class="headerlink" title="八、总结"></a>八、总结</h2><ul>
+<li>两者优缺点汇总</li>
+<li>推荐搭配使用的方法（如开发中用 ASan，发布前用 Valgrind 细扫）</li>
+</ul>
+<p>学习资料</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://valgrind.org/">https://valgrind.org/</a></li>
+<li><a target="_blank" rel="noopener" href="https://hardcore.feishu.cn/docx/doxcnXfsINxeICDFXePBelN3p5f">https://hardcore.feishu.cn/docx/doxcnXfsINxeICDFXePBelN3p5f</a></li>
+</ul>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/blog/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/" class="category-chain-item">数据结构与算法</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/blog/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" class="print-no-link">#学习笔记</a>
+      
+        <a href="/blog/tags/%E7%AE%97%E6%B3%95/" class="print-no-link">#算法</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>ASAN、valgrind（内存泄露的检测工具）</div>
+      <div>https://ruanqingxuan.github.io/blog/2025/09/17/ASAN、valgrind（内存泄露的检测工具）/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>John Doe</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年9月17日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/blog/2025/09/17/gperftools%EF%BC%88Google%20%E6%8F%90%E4%BE%9B%E7%9A%84%E5%BC%80%E6%BA%90%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E5%B7%A5%E5%85%B7%E9%9B%86%EF%BC%89/" title="gperftools（Google 提供的开源性能优化工具集）">
+                        <span class="hidden-mobile">gperftools（Google 提供的开源性能优化工具集）</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/blog/js/events.js" ></script>
+<script  src="/blog/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/blog/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/blog/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/blog/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
